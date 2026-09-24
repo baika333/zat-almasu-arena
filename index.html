@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Зат алмасу — Арена</title>
+<style>
+  :root{
+    --ink:#0f1319;--ink-soft:#5b6472;--line:rgba(16,20,24,.08);--card:rgba(255,255,255,.74);
+    --accent:#4f6ef7;--accent2:#9b5cf6;--good:#16b981;--bad:#ef4444;--amber:#f59e0b;
+    --radius:22px;--shadow:0 20px 50px -18px rgba(30,41,80,.25);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,"Noto Sans",sans-serif;
+    background:#f6f7fb;color:var(--ink);overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .blob{position:fixed;border-radius:50%;filter:blur(72px);opacity:.6;z-index:0;pointer-events:none;animation:float 14s ease-in-out infinite alternate}
+  .blob.b1{width:360px;height:360px;background:#dbe4ff;top:-130px;left:-110px}
+  .blob.b2{width:320px;height:320px;background:#f1e2ff;bottom:-110px;right:-100px;animation-delay:-4s}
+  .blob.b3{width:240px;height:240px;background:#dcfaf0;top:45%;left:58%;animation-delay:-8s}
+  .blob.b4{width:200px;height:200px;background:#ffeef3;top:12%;right:-60px;animation-delay:-11s}
+  @keyframes float{from{transform:translate(0,0) scale(1)}to{transform:translate(34px,-44px) scale(1.16)}}
+  #fx,#confetti{position:fixed;inset:0;z-index:1;pointer-events:none}
+  #confetti{z-index:60}
+  #flash{position:fixed;inset:0;z-index:70;pointer-events:none;opacity:0;
+    background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.95),rgba(255,255,255,0) 65%)}
+  #flash.go{animation:flashAnim .7s ease-out}
+  @keyframes flashAnim{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+  #shock{position:fixed;z-index:5;left:50%;top:32%;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);
+    pointer-events:none;border:3px solid rgba(120,140,255,.8);opacity:0}
+  #shock.go{animation:shockAnim 1s cubic-bezier(.2,.8,.2,1)}
+  @keyframes shockAnim{0%{opacity:.9;width:20px;height:20px;border-width:6px}100%{opacity:0;width:300vmax;height:300vmax;
+    margin-left:-150vmax;margin-top:-150vmax;border-width:1px}}
+  #app{position:relative;z-index:2;max-width:520px;margin:0 auto;height:100dvh;overflow:hidden}
+  #app.shake{animation:shakeApp .5s}
+  @keyframes shakeApp{10%,90%{transform:translateX(-4px)}20%,80%{transform:translateX(7px)}
+    30%,50%,70%{transform:translateX(-10px)}40%,60%{transform:translateX(10px)}}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:20px 18px 26px;
+    opacity:0;pointer-events:none;transform:translateY(16px) scale(.985);filter:blur(6px);
+    transition:opacity .5s ease,transform .5s cubic-bezier(.2,.8,.2,1),filter .5s ease;
+    overflow-y:auto;overscroll-behavior:contain}
+  .screen.active{opacity:1;pointer-events:auto;transform:none;filter:none}
+  .rip{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.8),rgba(255,255,255,0) 70%);
+    transform:translate(-50%,-50%) scale(0);pointer-events:none;animation:ripAnim .6s ease-out forwards;z-index:3}
+  .rip.dark{background:radial-gradient(circle,rgba(79,110,247,.25),rgba(79,110,247,0) 70%)}
+  @keyframes ripAnim{to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+  .btn,.opt,.bin,.mode,.iconbtn,.pw{position:relative;overflow:hidden}
+
+  /* SPLASH */
+  #splash{justify-content:center;align-items:center;text-align:center;padding:0 24px}
+  .orbwrap{position:relative;width:200px;height:200px;margin-bottom:34px;opacity:0;animation:orbIn 1.1s cubic-bezier(.2,1,.3,1) .25s forwards}
+  @keyframes orbIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+  .orb{position:absolute;inset:28px;border-radius:50%;
+    background:radial-gradient(circle at 34% 30%,#fff 0%,#e7ecff 38%,#b7c4ff 70%,#8f9df7 100%);
+    box-shadow:0 0 70px 16px rgba(120,140,255,.5),inset -8px -12px 24px rgba(79,110,247,.35),inset 6px 8px 18px #fff;
+    animation:orbPulse 2.6s ease-in-out infinite}
+  @keyframes orbPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  .ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(79,110,247,.3);animation:ringSpin 6s linear infinite}
+  .ring::before{content:"";position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 16px 4px rgba(120,140,255,.75)}
+  .ring.r2{inset:-16px;animation-duration:9s;animation-direction:reverse;border-color:rgba(155,92,246,.22)}
+  .ring.r2::before{background:linear-gradient(135deg,var(--accent2),#ff8ecb);box-shadow:0 0 16px 4px rgba(155,92,246,.65)}
+  .ring.r3{inset:-32px;animation-duration:13s;border-style:dashed;border-color:rgba(16,185,129,.25)}
+  .ring.r3::before{background:linear-gradient(135deg,var(--good),#06b6d4);box-shadow:0 0 16px 4px rgba(16,185,129,.6)}
+  @keyframes ringSpin{to{transform:rotate(360deg)}}
+  .spark{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 10px 3px rgba(150,170,255,.9);
+    opacity:0;animation:sparkFly 2.2s ease-out infinite}
+  @keyframes sparkFly{0%{opacity:0;transform:translate(0,0) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.2)}}
+  .title-anim{font-size:34px;font-weight:800;letter-spacing:-.5px;line-height:1.12;overflow:hidden}
+  .title-anim .word{display:inline-block;overflow:hidden;vertical-align:top;margin:0 5px}
+  .title-anim .ltr{display:inline-block;transform:translateY(115%) rotate(8deg);opacity:0;animation:ltrIn .8s cubic-bezier(.2,.8,.2,1) forwards}
+  @keyframes ltrIn{to{transform:none;opacity:1}}
+  .grad-text{background:linear-gradient(100deg,var(--accent),var(--accent2) 55%,#e26fd0,var(--accent));background-size:260% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:gradMove 5s linear infinite}
+  @keyframes gradMove{to{background-position:260% 0}}
+  .subtitle{color:var(--ink-soft);font-size:15px;margin-top:12px;opacity:0;animation:fadeUp .8s ease 1.05s forwards}
+  .splash-btn{margin-top:36px;opacity:0;animation:fadeUp .8s ease 1.4s forwards}
+  .tap-hint{position:absolute;bottom:34px;left:0;right:0;text-align:center;color:#98a2b3;font-size:12px;
+    letter-spacing:2px;text-transform:uppercase;animation:blink 2.2s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font:inherit;
+    font-weight:700;color:#fff;padding:16px 34px;border-radius:999px;font-size:17px;
+    background:linear-gradient(120deg,var(--accent),var(--accent2));box-shadow:0 14px 30px -8px rgba(95,110,247,.55);
+    transition:transform .15s ease}
+  .btn:active{transform:scale(.95)}
+  .btn::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);
+    background-size:250% 100%;background-position:130% 0;animation:shine 3s ease-in-out infinite}
+  @keyframes shine{0%{background-position:130% 0}45%,100%{background-position:-130% 0}}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:0 8px 20px -10px rgba(30,41,80,.18)}
+  .btn.small{padding:11px 22px;font-size:14px}
+  .card{background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.85);box-shadow:var(--shadow);border-radius:var(--radius)}
+
+  /* HOME */
+  #home{gap:14px}
+  .home-head{padding-top:12px;text-align:center;animation:fadeUp .6s ease both}
+  .home-head h1{font-size:27px;font-weight:800;letter-spacing:-.4px}
+  .home-head p{color:var(--ink-soft);font-size:13px;margin-top:4px}
+  .best-pill{display:inline-flex;align-items:center;gap:7px;margin-top:12px;background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;color:var(--ink-soft);box-shadow:0 6px 16px -8px rgba(30,41,80,.15)}
+  .best-pill b{color:var(--ink)}
+  .mode{display:flex;align-items:center;gap:15px;padding:18px;cursor:pointer;transition:transform .18s ease;animation:fadeUp .6s ease both}
+  .mode:nth-of-type(1){animation-delay:.08s}.mode:nth-of-type(2){animation-delay:.18s}.mode:nth-of-type(3){animation-delay:.28s}
+  .mode:active{transform:scale(.96)}
+  .mode .ico{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center;font-size:27px;
+    background:linear-gradient(135deg,#eef1ff,#f6ecff);box-shadow:inset 0 0 0 1px rgba(79,110,247,.1);animation:icoBob 3.4s ease-in-out infinite}
+  .mode:nth-of-type(2) .ico{animation-delay:-1.1s}.mode:nth-of-type(3) .ico{animation-delay:-2.2s}
+  @keyframes icoBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-4deg)}}
+  .mode h3{font-size:16.5px;font-weight:750}
+  .mode p{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.35}
+  .mode .arrow{margin-left:auto;color:#c2cad6;font-size:20px;transition:transform .2s}
+  .mode:active .arrow{transform:translateX(4px)}
+
+  /* SHARED GAME UI */
+  .topbar{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+  .iconbtn{width:42px;height:42px;flex:0 0 42px;border-radius:14px;border:1px solid var(--line);background:#fff;font-size:18px;
+    cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 14px -8px rgba(30,41,80,.15);transition:transform .15s}
+  .iconbtn:active{transform:scale(.88) rotate(-8deg)}
+  .topbar .meta{flex:1;min-width:0}
+  .topbar .label{font-size:10.5px;text-transform:uppercase;letter-spacing:1.4px;color:#98a2b3;font-weight:700}
+  .topbar .val{font-size:17px;font-weight:800;margin-top:1px}
+  .streak-badge{font-size:13px;font-weight:800;color:#98a2b3;opacity:.35;transition:all .3s;display:flex;align-items:center;gap:4px}
+  .streak-badge.on{opacity:1;color:var(--amber)}
+  .streak-badge.hot{color:#f97316;text-shadow:0 0 14px rgba(249,115,22,.65);animation:hotPulse .8s ease-in-out infinite}
+  @keyframes hotPulse{50%{transform:scale(1.15) rotate(-4deg)}}
+  .pbar{height:8px;border-radius:99px;background:rgba(16,20,24,.07);overflow:hidden;margin-bottom:6px}
+  .pbar i{display:block;height:100%;border-radius:99px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2),#e26fd0);
+    background-size:200% 100%;animation:gradMove 3s linear infinite;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+  .dots span{width:8px;height:8px;border-radius:50%;background:rgba(16,20,24,.1);transition:all .35s}
+  .dots span.done{background:var(--good);transform:scale(1.3)}
+  .dots span.miss{background:var(--bad)}
+  .dots span.now{background:var(--accent);transform:scale(1.6);box-shadow:0 0 10px 2px rgba(79,110,247,.5)}
+  .qcard{padding:20px;animation:slideIn .45s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes slideIn{from{opacity:0;transform:translateX(36px) scale(.97)}to{opacity:1;transform:none}}
+  .qhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .qcat{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);
+    background:#eef1ff;padding:5px 12px;border-radius:99px}
+  .tqwrap{margin-left:auto;position:relative;width:52px;height:52px;flex:0 0 52px}
+  .tqring{width:52px;height:52px;transform:rotate(-90deg)}
+  .tqbg{fill:none;stroke:#e9edf6;stroke-width:5}
+  .tqfg{fill:none;stroke:url(#tqg);stroke-width:5;stroke-linecap:round;stroke-dasharray:125.66}
+  .tqnum{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;font-weight:900}
+  .tqwrap.low .tqfg{stroke:var(--bad)}
+  .tqwrap.low .tqnum{color:var(--bad);animation:pulse .5s infinite}
+  @keyframes pulse{50%{transform:scale(1.18)}}
+  .qtext{font-size:19px;font-weight:750;line-height:1.4;letter-spacing:-.2px}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+  .opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;font:inherit;cursor:pointer;background:#fff;
+    border:1.5px solid var(--line);border-radius:16px;padding:14px 15px;font-size:15px;font-weight:600;color:var(--ink);
+    transition:transform .15s,border-color .2s,background .2s,opacity .4s;box-shadow:0 8px 18px -12px rgba(30,41,80,.14);
+    animation:optIn .4s cubic-bezier(.2,.8,.2,1) both}
+  .opt:nth-child(2){animation-delay:.05s}.opt:nth-child(3){animation-delay:.1s}.opt:nth-child(4){animation-delay:.15s}
+  @keyframes optIn{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+  .opt:active{transform:scale(.98)}
+  .opt .k{width:26px;height:26px;flex:0 0 26px;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:800;
+    background:#f1f3f9;color:#7a8494;transition:all .25s}
+  .opt.correct{border-color:var(--good);background:#ecfdf5;color:#067a55;animation:winGlow .9s ease}
+  .opt.correct .k{background:var(--good);color:#fff}
+  @keyframes winGlow{30%{box-shadow:0 0 0 9px rgba(22,185,129,.18)}}
+  .opt.wrong{border-color:var(--bad);background:#fef2f2;color:#b91c1c;animation:shake2 .45s}
+  .opt.wrong .k{background:var(--bad);color:#fff}
+  @keyframes shake2{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+  .opt.dim{opacity:.4;pointer-events:none}
+  .opt.vanish{opacity:0;transform:scale(.85) translateX(-20px);pointer-events:none}
+  .explain{margin-top:14px;padding:15px 16px;border-radius:16px;background:#fff;border:1px solid var(--line);
+    font-size:13.5px;line-height:1.55;color:var(--ink-soft);display:none}
+  .explain.show{display:block;animation:fadeUp .45s cubic-bezier(.2,.8,.2,1)}
+  .explain b{color:var(--ink)}
+  .next-wrap{margin-top:14px;display:none;justify-content:flex-end}
+  .next-wrap.show{display:flex;animation:fadeUp .35s ease}
+  .powerups{display:flex;gap:9px;margin-bottom:12px}
+  .pw{flex:1;border:1px solid var(--line);background:#fff;border-radius:14px;padding:9px 4px;cursor:pointer;font:inherit;
+    font-size:11.5px;font-weight:800;color:var(--ink-soft);display:flex;flex-direction:column;align-items:center;gap:2px;
+    transition:transform .15s,box-shadow .3s;box-shadow:0 8px 16px -10px rgba(30,41,80,.15)}
+  .pw span:first-child{font-size:17px}
+  .pw:active{transform:scale(.93)}
+  .pw.used{opacity:.32;pointer-events:none;filter:grayscale(1)}
+  .pw.armed{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px rgba(79,110,247,.15);animation:armGlow 1.2s ease-in-out infinite}
+  @keyframes armGlow{50%{box-shadow:0 0 0 7px rgba(79,110,247,.1)}}
+  .combo-pop{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:50;pointer-events:none;font-size:32px;
+    font-weight:900;letter-spacing:-1px;white-space:nowrap;background:linear-gradient(120deg,#f97316,#ef4444,#f59e0b);
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:comboAnim 1.1s cubic-bezier(.2,1,.3,1) forwards}
+  @keyframes comboAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-6deg)}
+    25%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(2deg)}
+    60%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-72%) scale(1.05)}}
+  .toast{position:fixed;top:calc(env(safe-area-inset-top) + 70px);left:50%;transform:translateX(-50%);z-index:55;background:#0f1319;
+    color:#fff;font-size:13px;font-weight:700;padding:11px 20px;border-radius:99px;box-shadow:0 16px 30px -10px rgba(15,19,25,.5);
+    animation:toastAnim 1.9s ease forwards;white-space:nowrap}
+  @keyframes toastAnim{0%{opacity:0;transform:translate(-50%,-16px)}12%,78%{opacity:1;transform:translate(-50%,0)}
+    100%{opacity:0;transform:translate(-50%,-10px)}}
+
+  /* SORT */
+  .foodstage{position:relative;flex:0 0 auto;height:238px;display:grid;place-items:center;margin:6px 0 10px}
+  .foodcard{width:158px;height:158px;border-radius:30px;display:grid;place-items:center;grid-template-rows:1fr auto;
+    padding:16px 10px;transition:transform .3s,opacity .3s;animation:foodIn .45s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes foodIn{from{opacity:0;transform:scale(.5) rotate(10deg)}to{opacity:1;transform:none}}
+  .foodcard .femoji{font-size:60px;align-self:end;filter:drop-shadow(0 10px 16px rgba(30,41,80,.2));animation:foodWob 2.6s ease-in-out infinite}
+  @keyframes foodWob{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-6px)}}
+  .foodcard .fname{font-size:14.5px;font-weight:800;text-align:center}
+  .foodcard.gone{opacity:0;transform:scale(.4) rotate(-14deg)}
+  .foodcard.bad-anim{animation:shake2 .45s}
+  .bins{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+  .bin{border:none;font:inherit;cursor:pointer;border-radius:18px;padding:15px 6px 12px;color:#fff;font-weight:800;
+    display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;transition:transform .15s}
+  .bin:active{transform:scale(.92)}
+  .bin.protein{background:linear-gradient(140deg,#4f6ef7,#7b5cf6)}
+  .bin.fat{background:linear-gradient(140deg,#f59e0b,#f97316)}
+  .bin.carb{background:linear-gradient(140deg,#10b981,#06b6d4)}
+  .bin .bico{font-size:24px}
+  .bin .hint{font-size:10px;font-weight:600;opacity:.85}
+  .timerline{height:7px;border-radius:99px;background:rgba(16,20,24,.07);overflow:hidden;margin:4px 0 12px}
+  .timerline i{display:block;height:100%;background:linear-gradient(90deg,var(--good),var(--amber),var(--bad));
+    width:100%;transform-origin:left;border-radius:99px}
+  .float-score{position:absolute;left:50%;top:12%;transform:translateX(-50%);font-weight:900;font-size:28px;pointer-events:none;
+    animation:floatUp .95s ease-out forwards;z-index:5;text-shadow:0 4px 18px rgba(255,255,255,.9)}
+  .float-score.plus{color:var(--good)}.float-score.minus{color:var(--bad)}
+  @keyframes floatUp{from{opacity:1;transform:translate(-50%,0) scale(1)}to{opacity:0;transform:translate(-50%,-80px) scale(1.35)}}
+
+  /* CALC */
+  .mealcard{padding:20px;text-align:center}
+  .mealcard .mname{font-size:17px;font-weight:800}
+  .macrogrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+  .macro{border-radius:16px;padding:11px 6px;background:#f7f8fc;border:1px solid var(--line);animation:popIn .45s cubic-bezier(.2,1.5,.4,1) both}
+  .macro:nth-child(2){animation-delay:.08s}.macro:nth-child(3){animation-delay:.16s}
+  @keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+  .macro .mv{font-size:21px;font-weight:900}
+  .macro .ml{font-size:10.5px;color:var(--ink-soft);font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+  .formula-hint{font-size:11.5px;color:#98a2b3;margin-top:11px;font-weight:600}
+  .countdown{font-size:38px;font-weight:900;text-align:center;margin:2px 0 0;letter-spacing:-1px}
+  .countdown.low{color:var(--bad);animation:pulse .5s infinite}
+
+  /* RESULT */
+  #result{justify-content:center;align-items:center;text-align:center}
+  .ringsvg{width:195px;height:195px;transform:rotate(-90deg);filter:drop-shadow(0 14px 34px rgba(95,110,247,.3))}
+  .ringbg{fill:none;stroke:#e9edf6;stroke-width:12}
+  .ringfg{fill:none;stroke:url(#rg);stroke-width:12;stroke-linecap:round;stroke-dasharray:478;stroke-dashoffset:478;
+    transition:stroke-dashoffset 1.5s cubic-bezier(.2,.8,.2,1)}
+  .ringwrap{position:relative;display:grid;place-items:center;animation:popIn .6s cubic-bezier(.2,1.4,.4,1) both}
+  .ringcenter{position:absolute;text-align:center}
+  .ringcenter .big{font-size:46px;font-weight:900;letter-spacing:-1px}
+  .ringcenter .small{font-size:12px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+  .rank{font-size:23px;font-weight:850;margin-top:18px;overflow:hidden}
+  .rank .ltr{display:inline-block;transform:translateY(110%);opacity:0;animation:ltrIn .5s cubic-bezier(.2,.8,.2,1) forwards}
+  .rank-sub{color:var(--ink-soft);font-size:14px;margin-top:6px;line-height:1.5;opacity:0;animation:fadeUp .6s ease .55s forwards}
+  .record-flag{display:none;margin-top:12px;background:linear-gradient(120deg,#fff7e6,#fef3c7);border:1px solid #fde68a;color:#b45309;
+    font-weight:800;font-size:13px;padding:9px 18px;border-radius:999px;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+  .record-flag.show{display:inline-block}
+  .res-stats{display:flex;gap:10px;margin-top:18px;width:100%;max-width:360px}
+  .res-stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 6px;animation:popIn .5s cubic-bezier(.2,1.5,.4,1) both}
+  .res-stat:nth-child(2){animation-delay:.1s}.res-stat:nth-child(3){animation-delay:.2s}
+  .res-stat .v{font-size:19px;font-weight:900}
+  .res-stat .l{font-size:10px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+  .res-btns{display:flex;gap:11px;margin-top:22px;opacity:0;animation:fadeUp .6s ease .65s forwards}
+
+  /* SVG icons */
+  .ic{display:inline-block;vertical-align:middle;flex:0 0 auto}
+  .ico .ic{width:36px;height:36px}
+  .bico .ic{width:27px;height:27px}
+  #fEmoji .ic{width:68px;height:68px}
+  .memeal .ic{width:46px;height:46px}
+  .pw .ic{width:20px;height:20px}
+  .streak-badge .ic{width:16px;height:16px}
+  .btn .ic{width:18px;height:18px}
+  .iconbtn .ic{width:21px;height:21px}
+  .best-pill .ic{width:16px;height:16px}
+  .record-flag .ic{width:16px;height:16px}
+  .combo-pop .ic{width:34px;height:34px;margin:0 6px;vertical-align:-6px}
+  .orb .ic{position:absolute;inset:0;margin:auto;width:62px;height:62px;opacity:.92;
+    animation:ringSpin 14s linear infinite}
+  .rank .ic{width:30px;height:30px;margin-right:7px;vertical-align:-6px}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+<canvas id="fx"></canvas><canvas id="confetti"></canvas>
+<div id="flash"></div><div id="shock"></div>
+
+<div id="app">
+
+  <section class="screen active" id="splash">
+    <div class="orbwrap">
+      <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+      <div class="orb" id="orb"><svg class="ic" viewBox="0 0 64 64"><use href="#i-molecule"/></svg></div>
+      <span class="spark" style="--sx:-80px;--sy:-66px;left:50%;top:50%;animation-delay:.1s"></span>
+      <span class="spark" style="--sx:88px;--sy:-44px;left:50%;top:50%;animation-delay:.5s"></span>
+      <span class="spark" style="--sx:-64px;--sy:76px;left:50%;top:50%;animation-delay:.9s"></span>
+      <span class="spark" style="--sx:76px;--sy:70px;left:50%;top:50%;animation-delay:1.3s"></span>
+      <span class="spark" style="--sx:6px;--sy:-100px;left:50%;top:50%;animation-delay:1.7s"></span>
+    </div>
+    <h1 class="title-anim" id="splashTitle"></h1>
+    <p class="subtitle">Денсаулық · Энергия · Дұрыс тағам</p>
+    <div class="splash-btn"><button class="btn" id="startBtn"><svg class="ic" viewBox="0 0 64 64"><use href="#i-bolt"/></svg> Ойынды бастау</button></div>
+    <div class="tap-hint">ТГН Практика 5–6 · 2.3–2.4</div>
+  </section>
+
+  <section class="screen" id="home">
+    <div class="home-head">
+      <h1>Зат алмасу <span class="grad-text">Арена</span></h1>
+      <p>Ағзадағы зат және энергия алмасу — білім ойыны</p>
+      <div class="best-pill"><svg class="ic" viewBox="0 0 64 64"><use href="#i-trophy"/></svg> Рекорд: <b id="bestScore">0</b> ұпай</div>
+    </div>
+    <div class="card mode" data-go="quiz">
+      <div class="ico"><svg class="ic" viewBox="0 0 64 64"><use href="#i-brain"/></svg></div><div><h3>Викторина</h3><p>10 сұрақ · уақыт сақинасы + күштер: 50/50, уақыт, қалқан</p></div><div class="arrow">›</div>
+    </div>
+    <div class="card mode" data-go="sort">
+      <div class="ico"><svg class="ic" viewBox="0 0 64 64"><use href="#i-apple"/></svg></div><div><h3>Нутриент сұрыптау</h3><p>Тағамды ақуыз / май / көмірсуға бөл. Комбо жина!</p></div><div class="arrow">›</div>
+    </div>
+    <div class="card mode" data-go="calc">
+      <div class="ico"><svg class="ic" viewBox="0 0 64 64"><use href="#i-bolt"/></svg></div><div><h3>Калория калькуляторы</h3><p>4 · 9 · 4 формуласымен энергия мәнін тап!</p></div><div class="arrow">›</div>
+    </div>
+  </section>
+
+  <section class="screen" id="quiz">
+    <div class="topbar">
+      <button class="iconbtn" data-back aria-label="артқа"><svg class="ic" viewBox="0 0 64 64"><use href="#i-back"/></svg></button>
+      <div class="meta"><div class="label">Сұрақ</div><div class="val" id="qCounter">1 / 10</div></div>
+      <div class="streak-badge" id="qStreak"><svg class="ic" viewBox="0 0 64 64"><use href="#i-flame"/></svg> <span>0</span></div>
+      <div class="meta" style="text-align:right"><div class="label">Ұпай</div><div class="val" id="qScore">0</div></div>
+    </div>
+    <div class="pbar"><i id="qProg"></i></div>
+    <div class="dots" id="qDots"></div>
+    <div class="powerups">
+      <button class="pw" id="pwFifty"><span><svg class="ic" viewBox="0 0 64 64"><use href="#i-scissors"/></svg></span>50 / 50</button>
+      <button class="pw" id="pwFreeze"><span><svg class="ic" viewBox="0 0 64 64"><use href="#i-pause"/></svg></span>+6 секунд</button>
+      <button class="pw" id="pwShield"><span><svg class="ic" viewBox="0 0 64 64"><use href="#i-shield"/></svg></span>Қалқан</button>
+    </div>
+    <div class="card qcard" id="qCard"></div>
+    <div class="explain" id="qExplain"></div>
+    <div class="next-wrap" id="qNextWrap"><button class="btn small" id="qNext">Келесі ›</button></div>
+  </section>
+
+  <section class="screen" id="sort">
+    <div class="topbar">
+      <button class="iconbtn" data-back aria-label="артқа"><svg class="ic" viewBox="0 0 64 64"><use href="#i-back"/></svg></button>
+      <div class="meta"><div class="label">Тағам</div><div class="val" id="sCounter">1 / 12</div></div>
+      <div class="streak-badge" id="sStreak"><svg class="ic" viewBox="0 0 64 64"><use href="#i-flame"/></svg> <span>0</span></div>
+      <div class="meta" style="text-align:right"><div class="label">Ұпай</div><div class="val" id="sScore">0</div></div>
+    </div>
+    <div class="timerline"><i id="sTimer"></i></div>
+    <div class="foodstage" id="foodStage">
+      <div class="card foodcard" id="foodCard">
+        <div class="femoji" id="fEmoji"><svg class="ic" viewBox="0 0 64 64"><use href="#i-steak"/></svg></div><div class="fname" id="fName">Ет</div>
+      </div>
+    </div>
+    <div class="bins">
+      <button class="bin protein" data-bin="protein"><span class="bico"><svg class="ic" viewBox="0 0 64 64"><use href="#i-egg"/></svg></span>Ақуыз<span class="hint">4 ккал/г</span></button>
+      <button class="bin fat" data-bin="fat"><span class="bico"><svg class="ic" viewBox="0 0 64 64"><use href="#i-butter"/></svg></span>Май<span class="hint">9 ккал/г</span></button>
+      <button class="bin carb" data-bin="carb"><span class="bico"><svg class="ic" viewBox="0 0 64 64"><use href="#i-bread"/></svg></span>Көмірсу<span class="hint">4 ккал/г</span></button>
+    </div>
+    <p style="text-align:center;font-size:12px;color:#98a2b3;margin-top:12px;font-weight:600">Негізгі қоректік затын анықта! Уақыт бітсе — комбо үзіледі.</p>
+  </section>
+
+  <section class="screen" id="calc">
+    <div class="topbar">
+      <button class="iconbtn" data-back aria-label="артқа"><svg class="ic" viewBox="0 0 64 64"><use href="#i-back"/></svg></button>
+      <div class="meta"><div class="label">Тағам</div><div class="val" id="cCounter">1 / 8</div></div>
+      <div class="streak-badge" id="cStreak"><svg class="ic" viewBox="0 0 64 64"><use href="#i-flame"/></svg> <span>0</span></div>
+      <div class="meta" style="text-align:right"><div class="label">Ұпай</div><div class="val" id="cScore">0</div></div>
+    </div>
+    <div class="pbar"><i id="cProg"></i></div>
+    <div class="countdown" id="cTime">15</div>
+    <div class="timerline"><i id="cTimer"></i></div>
+    <div class="card mealcard" id="cCard"></div>
+    <div class="opts" id="cOpts" style="margin-top:12px"></div>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="ringwrap">
+      <svg class="ringsvg" viewBox="0 0 180 180">
+        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4f6ef7"/><stop offset="100%" stop-color="#9b5cf6"/></linearGradient></defs>
+        <circle class="ringbg" cx="90" cy="90" r="76"/>
+        <circle class="ringfg" id="ringFg" cx="90" cy="90" r="76"/>
+      </svg>
+      <div class="ringcenter"><div class="big" id="rScore">0</div><div class="small">ұпай</div></div>
+    </div>
+    <div class="record-flag" id="rRecord"><svg class="ic" viewBox="0 0 64 64"><use href="#i-star"/></svg> Жаңа рекорд!</div>
+    <div class="rank" id="rRank"></div>
+    <div class="rank-sub" id="rSub"></div>
+    <div class="res-stats">
+      <div class="res-stat"><div class="v" id="rCorrect">0</div><div class="l">Дұрыс</div></div>
+      <div class="res-stat"><div class="v" id="rStreak">0</div><div class="l">Макс комбо</div></div>
+      <div class="res-stat"><div class="v" id="rAcc">0%</div><div class="l">Дәлдік</div></div>
+    </div>
+    <div class="res-btns">
+      <button class="btn ghost small" id="rHome"><svg class="ic" viewBox="0 0 64 64" style="filter:invert(20%)"><use href="#i-home"/></svg> Басты бет</button>
+      <button class="btn small" id="rAgain"><svg class="ic" viewBox="0 0 64 64"><use href="#i-replay"/></svg> Қайта ойнау</button>
+    </div>
+  </section>
+
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="tqg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#4f6ef7"/><stop offset="100%" stop-color="#9b5cf6"/></linearGradient>
+  <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8ea2ff"/><stop offset="1" stop-color="#4f6ef7"/></linearGradient>
+  <linearGradient id="gp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c39bff"/><stop offset="1" stop-color="#9b5cf6"/></linearGradient>
+  <linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#10b981"/></linearGradient>
+  <linearGradient id="gy" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+  <linearGradient id="gf" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ef4444"/><stop offset="1" stop-color="#fbbf24"/></linearGradient>
+  <linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fca5a5"/><stop offset="1" stop-color="#ef4444"/></linearGradient>
+  <linearGradient id="go" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fdba74"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+  <linearGradient id="gk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0ea5e9"/></linearGradient>
+  <symbol id="i-bolt" viewBox="0 0 64 64"><path d="M36 4 14 36h12l-6 24 24-34H32z" fill="url(#gy)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 64 64"><path d="M32 12c-7 0-12 4-13 9-6 1-10 6-10 11 0 6 4 11 10 12 2 4 6 6 13 6s11-2 13-6c6-1 10-6 10-12 0-5-4-10-10-11-1-5-6-9-13-9z" fill="#fbb6ce"/><path d="M32 14v36" stroke="#e26d9c" stroke-width="2.5"/><g stroke="#e26d9c" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M22 22c4 0 6 2 6 5M14 32c5 0 7 2 8 5M42 22c-4 0-6 2-6 5M50 32c-5 0-7 2-8 5M22 44c4 0 6-2 6-4M42 44c-4 0-6-2-6-4"/></g></symbol>
+  <symbol id="i-apple" viewBox="0 0 64 64"><path d="M32 18c-4-5-11-6-15-3-8 6-8 19-2 28 4 6 8 11 11 11 2 0 3-1 6-1s4 1 6 1c3 0 7-5 11-11 6-9 6-22-2-28-4-3-11-2-15 3z" fill="url(#gr)"/><path d="M32 18c0-6 3-10 8-12" stroke="#a16207" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M33 12c5-7 13-6 16-4-3 6-11 9-16 6z" fill="#34d399"/><path d="M21 27c-2 3-2 7-1 10" stroke="#fff" stroke-width="3" opacity=".5" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-steak" viewBox="0 0 64 64"><rect x="6" y="14" width="52" height="36" rx="18" fill="#b45309"/><rect x="12" y="20" width="40" height="24" rx="12" fill="#fb7185"/><path d="M20 28q6 6 12 0M30 38q6 6 12 0" stroke="#fecdd3" stroke-width="2.5" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-chicken" viewBox="0 0 64 64"><circle cx="26" cy="38" r="15" fill="#d97706"/><circle cx="22" cy="34" r="6" fill="#fbbf24" opacity=".55"/><path d="M36 26 49 13" stroke="#fde68a" stroke-width="7" stroke-linecap="round"/><circle cx="52" cy="11" r="5" fill="#fef9c3"/><circle cx="45" cy="8" r="4.5" fill="#fef9c3"/></symbol>
+  <symbol id="i-fish" viewBox="0 0 64 64"><path d="M48 32c-6 9-15 14-24 14S9 40 7 32c2-8 12-14 17-14s18 3 24 14z" fill="url(#gk)"/><path d="M46 32l11-11v22z" fill="#0284c7"/><path d="M32 18c3-7 9-8 11-4-2 4-6 6-11 4z" fill="#7dd3fc"/><circle cx="16" cy="28" r="2.5" fill="#0f1319"/><path d="M20 36q6 4 12 0" stroke="#0284c7" stroke-width="2" fill="none" opacity=".5"/></symbol>
+  <symbol id="i-egg" viewBox="0 0 64 64"><path d="M16 34C10 22 18 12 30 12s24 8 22 20c-2 10-10 18-20 18S20 42 16 34z" fill="#fff" stroke="#e6e9f0" stroke-width="2"/><circle cx="31" cy="28" r="9" fill="url(#gy)"/></symbol>
+  <symbol id="i-milk" viewBox="0 0 64 64"><path d="M22 20h20v30a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z" fill="#e0eaff"/><path d="M22 20l4-10h12l4 10z" fill="#b7c8f5"/><rect x="26" y="28" width="12" height="14" rx="3" fill="#6a8dff"/><path d="M24 12h4" stroke="#fff" stroke-width="2" opacity=".8"/></symbol>
+  <symbol id="i-beans" viewBox="0 0 64 64"><path d="M12 40C8 24 22 10 40 12c8 16-6 34-28 28z" fill="#4ade80"/><circle cx="24" cy="30" r="4" fill="#f0fdf4"/><circle cx="33" cy="23" r="4" fill="#f0fdf4"/><circle cx="36" cy="34" r="4" fill="#f0fdf4"/></symbol>
+  <symbol id="i-butter" viewBox="0 0 64 64"><path d="M12 24 30 14l22 8v16a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" fill="url(#gy)"/><path d="M12 24 30 14l22 8-20 8z" fill="#fde68a"/><rect x="22" y="31" width="16" height="9" rx="2" fill="#fff" opacity=".55"/></symbol>
+  <symbol id="i-oil" viewBox="0 0 64 64"><rect x="22" y="22" width="20" height="32" rx="7" fill="#fcd34d"/><rect x="27" y="10" width="10" height="10" rx="3" fill="#d97706"/><rect x="26" y="31" width="12" height="13" rx="3" fill="#fef3c7"/><path d="M32 35c2 3 3 4 3 6a3 3 0 0 1-6 0c0-2 1-3 3-6z" fill="#f59e0b"/></symbol>
+  <symbol id="i-nut" viewBox="0 0 64 64"><path d="M32 8c12 0 20 8 20 18 0 6-3 9-3 14s4 8 4 11c0 3-4 5-9 5s-8-2-12-2-7 2-12 2-9-2-9-5 4-6 4-11-3-8-3-14C12 16 20 8 32 8z" fill="url(#go)"/><path d="M32 10v44" stroke="#b45309" opacity=".35" stroke-width="2"/><path d="M22 20q10 8 20 0M20 34q12 8 24 0" stroke="#b45309" opacity=".35" stroke-width="2" fill="none"/></symbol>
+  <symbol id="i-choco" viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="38" rx="7" fill="#7c3f1d"/><g fill="#8f4c25"><rect x="13" y="17" width="18" height="16" rx="3"/><rect x="33" y="17" width="18" height="16" rx="3"/><rect x="13" y="35" width="18" height="14" rx="3"/><rect x="33" y="35" width="18" height="14" rx="3"/></g><path d="M10 21c8 4 14-6 22-2s10 8 22 4" stroke="#d6b98c" stroke-width="3" fill="none"/></symbol>
+  <symbol id="i-halva" viewBox="0 0 64 64"><rect x="18" y="13" width="28" height="9" rx="4" fill="#92400e"/><path d="M20 22h24l3 26a6 6 0 0 1-6 7H23a6 6 0 0 1-6-7z" fill="url(#gy)"/><path d="M26 33q6 5 12 0" stroke="#fff" opacity=".6" stroke-width="2.5" fill="none"/></symbol>
+  <symbol id="i-bacon" viewBox="0 0 64 64"><g fill="none" stroke-linecap="round"><path d="M10 24q6-10 11 0t11 0 11 0 11 0" stroke="#fca5a5" stroke-width="7"/><path d="M10 40q6-10 11 0t11 0 11 0 11 0" stroke="#f87171" stroke-width="7"/><path d="M10 24q6-10 11 0t11 0 11 0 11 0" stroke="#fee2e2" stroke-width="2.5"/><path d="M10 40q6-10 11 0t11 0 11 0 11 0" stroke="#fee2e2" stroke-width="2.5"/></g></symbol>
+  <symbol id="i-bread" viewBox="0 0 64 64"><path d="M12 28c0-9 10-14 20-14s20 5 20 14v12a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8z" fill="url(#go)"/><path d="M22 20c3 3 3 7 0 10M32 18c3 3 3 7 0 10M42 20c-3 3-3 7 0 10" stroke="#b45309" opacity=".4" stroke-width="2.5" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-rice" viewBox="0 0 64 64"><g stroke="#c2410c" stroke-width="3" stroke-linecap="round"><path d="M40 12l16 10M46 9l11 12"/></g><path d="M10 32h44c0 13-10 20-22 20S10 45 10 32z" fill="#dbeafe"/><path d="M16 32c1-8 8-13 16-13s15 5 16 13z" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/><g fill="#cbd5e1"><circle cx="26" cy="27" r="1.6"/><circle cx="34" cy="24" r="1.6"/><circle cx="40" cy="28" r="1.6"/></g></symbol>
+  <symbol id="i-potato" viewBox="0 0 64 64"><path d="M20 16c10-8 26-4 30 8s0 22-12 26-26 4-30-8 2-18 12-26z" fill="#d6a656"/><g fill="#b4833a"><circle cx="26" cy="28" r="2"/><circle cx="40" cy="24" r="1.6"/><circle cx="36" cy="38" r="2"/><circle cx="22" cy="38" r="1.4"/></g></symbol>
+  <symbol id="i-slice" viewBox="0 0 64 64"><circle cx="32" cy="35" r="18" fill="#fcd34d" stroke="#f59e0b" stroke-width="3"/><circle cx="32" cy="35" r="10" fill="#fef3c7"/><g fill="#92400e"><ellipse cx="29" cy="33" rx="1.5" ry="2.6"/><ellipse cx="35" cy="36" rx="1.5" ry="2.6"/></g><path d="M32 17c0-4 2-6 5-8" stroke="#a16207" stroke-width="2.5" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-pasta" viewBox="0 0 64 64"><path d="M10 34h44c0 12-10 18-22 18S10 46 10 34z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/><g stroke="url(#gy)" stroke-width="5" fill="none" stroke-linecap="round"><path d="M18 30c2-10 8-14 14-12M26 30c2-12 10-16 16-12M34 30c3-10 9-12 12-10"/></g><circle cx="26" cy="18" r="3" fill="#ef4444"/><circle cx="38" cy="15" r="3" fill="#ef4444"/></symbol>
+  <symbol id="i-candy" viewBox="0 0 64 64"><path d="M20 32 6 22l4 10-4 10z" fill="#a78bfa"/><path d="M44 32l14-10-4 10 4 10z" fill="#a78bfa"/><circle cx="32" cy="32" r="12" fill="url(#gp)"/><path d="M32 20a12 12 0 0 1 0 24z" fill="#c4b5fd"/><path d="M27 26q4 3 9 9" stroke="#fff" opacity=".75" stroke-width="2.5" fill="none"/></symbol>
+  <symbol id="i-carrot" viewBox="0 0 64 64"><path d="M26 21 42 19l-6 30-3 9-3-9z" fill="url(#go)"/><path d="M30 30l8-1M31 39l7-1" stroke="#c2410c" opacity=".5" stroke-width="2"/><path d="M26 21c-3-8 1-13 8-15 1 7-1 11-4 13M42 19c0-8 5-11 12-11-2 7-7 10-11 10" fill="#4ade80"/></symbol>
+  <symbol id="i-cheese" viewBox="0 0 64 64"><path d="M10 42 34 14l20 8v20z" fill="url(#gy)"/><path d="M34 14l20 8-7 2z" fill="#fde68a"/><g fill="#f59e0b"><circle cx="26" cy="35" r="3"/><circle cx="38" cy="31" r="2.5"/><circle cx="40" cy="40" r="3"/></g></symbol>
+  <symbol id="i-plate" viewBox="0 0 64 64"><path d="M14 38a18 18 0 0 1 36 0z" fill="#cbd5e1"/><rect x="10" y="38" width="44" height="6" rx="3" fill="#94a3b8"/><circle cx="32" cy="16" r="3" fill="#64748b"/><path d="M22 32c2-6 8-8 12-6" stroke="#fff" opacity=".5" stroke-width="2.5" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-bowl" viewBox="0 0 64 64"><path d="M10 30h44c0 13-9 21-22 21S10 43 10 30z" fill="url(#gb)"/><path d="M16 26c4-4 8 2 12-2s8 2 12-2 6 2 8 0" stroke="#fbbf24" stroke-width="4" fill="none" stroke-linecap="round"/><g stroke="#94a3b8" stroke-width="2.5" fill="none" opacity=".7"><path d="M26 16c0-4 4-4 4-8M36 16c0-4 4-4 4-8"/></g></symbol>
+  <symbol id="i-tray" viewBox="0 0 64 64"><rect x="8" y="16" width="48" height="34" rx="8" fill="#e2e8f0"/><circle cx="24" cy="33" r="10" fill="url(#gy)"/><g stroke="#4f6ef7" stroke-width="3" stroke-linecap="round"><path d="M38 25h12M38 33h12M38 41h8"/></g></symbol>
+  <symbol id="i-cup" viewBox="0 0 64 64"><path d="M46 26h6a6 6 0 0 1 0 12h-6" stroke="#e7c98a" stroke-width="3" fill="none"/><path d="M16 22h30v20a10 10 0 0 1-10 10H26a10 10 0 0 1-10-10z" fill="#fef3c7" stroke="#e7c98a" stroke-width="2"/><rect x="19" y="27" width="24" height="6" rx="3" fill="#d6a656"/><path d="M34 18c0-5 6-5 6-10" stroke="#f59e0b" stroke-width="3" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 64 64"><path d="M20 10h24v14c0 9-5 14-12 14s-12-5-12-14z" fill="url(#gy)"/><path d="M20 14h-9c0 9 5 12 9 12M44 14h9c0 9-5 12-9 12" stroke="#f59e0b" stroke-width="4" fill="none"/><rect x="28" y="38" width="8" height="8" fill="#f59e0b"/><rect x="18" y="46" width="28" height="7" rx="3.5" fill="#d97706"/><path d="M28 18l4 4 6-8" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 64 64"><path d="M32 5 53 13v15c0 15-9 25-21 30C21 53 12 43 12 28V13z" fill="url(#gb)"/><path d="M23 31l6 7 13-14" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 64 64"><g stroke="#4f6ef7" stroke-width="4.5" fill="none" stroke-linecap="round"><circle cx="17" cy="47" r="7"/><circle cx="47" cy="47" r="7"/><path d="M22 42 48 12M42 42 16 12"/></g><circle cx="32" cy="33" r="3" fill="#9b5cf6"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 64 64"><rect x="18" y="14" width="10" height="36" rx="4" fill="#4f6ef7"/><rect x="36" y="14" width="10" height="36" rx="4" fill="#9b5cf6"/><path d="M52 10c-6 4-8 10-6 16" stroke="#7dd3fc" stroke-width="3" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 64 64"><path d="M33 4c7 11-3 16 1 22 4-2 5-7 5-7 7 6 10 14 10 19a17 17 0 0 1-34 0C15 27 25 15 33 4z" fill="url(#gf)"/><path d="M31 30c3 5-1 8 1 11a6 6 0 0 1-11-2c0-5 4-7 10-9z" fill="#fef08a"/></symbol>
+  <symbol id="i-home" viewBox="0 0 64 64"><path d="M10 30 32 11l22 19" stroke="#334155" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 28v22a3 3 0 0 0 3 3h10V39h8v14h10a3 3 0 0 0 3-3V28" fill="#475569"/></symbol>
+  <symbol id="i-replay" viewBox="0 0 64 64"><path d="M48 26A18 18 0 1 0 50 38" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M40 12l14 8-14 9z" fill="#fff"/></symbol>
+  <symbol id="i-back" viewBox="0 0 64 64"><path d="M38 14 20 32l18 18" stroke="#0f1319" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-star" viewBox="0 0 64 64"><path d="M32 6l7 16 17 6-17 6-7 16-7-16-17-6 17-6z" fill="url(#gy)"/></symbol>
+  <symbol id="i-molecule" viewBox="0 0 64 64"><g stroke="#4f6ef7" stroke-width="2" fill="none" opacity=".65"><ellipse cx="32" cy="32" rx="24" ry="9"/><ellipse cx="32" cy="32" rx="24" ry="9" transform="rotate(60 32 32)"/><ellipse cx="32" cy="32" rx="24" ry="9" transform="rotate(120 32 32)"/></g><circle cx="32" cy="32" r="6" fill="#4f6ef7"/><circle cx="54" cy="27" r="3.5" fill="#9b5cf6"/><circle cx="12" cy="37" r="3.5" fill="#10b981"/><circle cx="32" cy="9" r="3" fill="#f59e0b"/></symbol>
+</defs></svg>
+
+<script>
+(function(){
+"use strict";
+/* ============ helpers ============ */
+function $(id){return document.getElementById(id);}
+var app=$('app');
+function buzz(ms){if(navigator.vibrate)navigator.vibrate(ms||12);}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function ico(n){return '<svg class="ic" viewBox="0 0 64 64" aria-hidden="true"><use href="#i-'+n+'"/></svg>';}
+
+/* ============ audio ============ */
+var AC=null;
+function ac(){if(!AC){var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;AC=new C();}
+  if(AC.state==='suspended')AC.resume();return AC;}
+function beep(f,d,type,v,delay,slide){var c=ac();if(!c)return;
+  var o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(delay||0);
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v||.12,t+.012);
+  g.gain.exponentialRampToValueAtTime(.0005,t+d);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.06);}
+var sfx={
+  click:function(){beep(520,.06,'triangle',.05);},
+  correct:function(){beep(660,.12,'sine',.12);beep(880,.2,'sine',.1,.09);beep(1320,.22,'sine',.05,.16);},
+  wrong:function(){beep(240,.28,'sawtooth',.06,0,110);beep(180,.3,'square',.04,.05,90);},
+  tick:function(){beep(980,.05,'square',.028);},
+  combo:function(){[523,659,784,1047,1319].forEach(function(f,i){beep(f,.12,'triangle',.08,i*.055);});},
+  win:function(){[523,659,784,1047,784,1047,1319].forEach(function(f,i){beep(f,.22,'sine',.1,i*.11);});},
+  whoosh:function(){beep(140,.3,'sine',.06,0,560);beep(90,.25,'triangle',.05,.05,420);},
+  power:function(){beep(300,.35,'sine',.09,0,1300);beep(600,.2,'triangle',.06,.12,1600);}
+};
+
+/* ============ canvas fx ============ */
+var fx=$('fx'),fctx=fx.getContext('2d'),W=0,H=0,DPR=Math.min(window.devicePixelRatio||1,2);
+function fit(){W=innerWidth;H=innerHeight;fx.width=W*DPR;fx.height=H*DPR;fctx.setTransform(DPR,0,0,DPR,0,0);
+  var cf=$('confetti');cf.width=W*DPR;cf.height=H*DPR;}
+fit();addEventListener('resize',fit);
+var parts=[],fxMode='intro',ripples=[],t0=performance.now();
+function initParts(){parts=[];var n=clamp(Math.floor(W*H/9000),30,70);
+  for(var i=0;i<n;i++)parts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,
+    r:Math.random()*2+.6,a:Math.random()*.5+.25,c:Math.random()<.5?'79,110,247':(Math.random()<.5?'155,92,246':'16,185,129')});}
+initParts();
+function loop(now){var el=(now-t0)/1000;fctx.clearRect(0,0,W,H);
+  var cx=W/2,cy=H*0.30;
+  for(var i=0;i<ripples.length;i++){var rp=ripples[i];rp.r+=6;rp.a*=.94;
+    if(rp.a<.01){ripples.splice(i,1);i--;continue;}
+    fctx.beginPath();fctx.arc(rp.x,rp.y,rp.r,0,6.283);fctx.strokeStyle='rgba(79,110,247,'+rp.a+')';fctx.lineWidth=2;fctx.stroke();}
+  for(i=0;i<parts.length;i++){var p=parts[i];
+    if(fxMode==='intro'){var ang=el*.55+i*.34,rad=58+(i%3)*44+Math.sin(el*2+i)*15;
+      p.x+=(cx+Math.cos(ang)*rad-p.x)*.022;p.y+=(cy+Math.sin(ang)*rad*.72-p.y)*.022;
+    }else{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;}
+    fctx.beginPath();fctx.arc(p.x,p.y,p.r,0,6.283);
+    fctx.fillStyle='rgba('+p.c+','+(p.a*(fxMode==='intro'?Math.min(1,el*.45):.4))+')';fctx.fill();
+    for(var j=i+1;j<parts.length;j++){var q=parts[j],dx=p.x-q.x,dy=p.y-q.y,d=dx*dx+dy*dy;
+      if(d<6400){fctx.strokeStyle='rgba(120,140,220,'+(.1*(1-d/6400))+')';fctx.beginPath();fctx.moveTo(p.x,p.y);fctx.lineTo(q.x,q.y);fctx.stroke();}}}
+  if(confList.length)drawConf();
+  requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+setInterval(function(){for(var i=0;i<parts.length;i++){var p=parts[i];p.vx*=.92;p.vy*=.92;
+  if(fxMode!=='intro'){if(Math.abs(p.vx)<.15)p.vx+=(Math.random()-.5)*.06;if(Math.abs(p.vy)<.15)p.vy+=(Math.random()-.5)*.06;}}},400);
+
+/* ============ confetti ============ */
+var cctx=$('confetti').getContext('2d'),confList=[];
+function drawConf(){cctx.clearRect(0,0,W,H);
+  for(var i=confList.length-1;i>=0;i--){var c=confList[i];c.vy+=.13;c.x+=c.vx+Math.sin(c.y*.02)*.4;c.y+=c.vy;c.rot+=c.vr;
+    cctx.save();cctx.translate(c.x,c.y);cctx.rotate(c.rot);cctx.fillStyle=c.col;
+    if(c.ribbon)cctx.fillRect(-c.w/2,-c.h/2,c.w,c.h);else{cctx.beginPath();cctx.arc(0,0,c.w/2,0,6.283);cctx.fill();}
+    cctx.restore();if(c.y>H+40)confList.splice(i,1);}}
+function burstConfetti(n){var cols=['#4f6ef7','#9b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#e26fd0'];
+  for(var i=0;i<(n||90);i++)confList.push({x:Math.random()*W,y:-20-Math.random()*80,vx:(Math.random()-.5)*3,
+    vy:Math.random()*2+1.2,w:4+Math.random()*6,h:8+Math.random()*7,rot:Math.random()*6.28,vr:(Math.random()-.5)*.26,
+    col:cols[i%cols.length],ribbon:Math.random()<.7});}
+function burstMini(el){var r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  for(var i=0;i<10;i++){var s=document.createElement('span'),a=i/10*6.283;
+    s.style.cssText='position:fixed;z-index:65;width:8px;height:8px;border-radius:50%;pointer-events:none;left:'+cx+'px;top:'+cy+'px;background:'+pick(['#4f6ef7','#9b5cf6','#10b981','#f59e0b','#e26fd0']);
+    document.body.appendChild(s);
+    s.animate([{transform:'translate(-50%,-50%) scale(1)',opacity:1},
+      {transform:'translate(calc(-50% + '+Math.cos(a)*62+'px),calc(-50% + '+Math.sin(a)*62+'px)) scale(.2)',opacity:0}],
+      {duration:560,easing:'cubic-bezier(.2,.8,.2,1)'}).onfinish=function(){this.effect.target.remove();};}}
+
+/* ============ screens ============ */
+function flash(){var f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');}
+function show(id){var ss=document.querySelectorAll('.screen');for(var i=0;i<ss.length;i++)ss[i].classList.remove('active');
+  var t=$(id);t.classList.add('active');t.scrollTop=0;fxMode=(id==='splash')?'intro':'ambient';}
+function shakeApp(){app.classList.remove('shake');void app.offsetWidth;app.classList.add('shake');}
+function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.remove();},1900);}
+function comboPop(streak){var t=document.createElement('div');t.className='combo-pop';
+  t.innerHTML=ico('flame')+' ОТ ТІЗІГІ ×'+streak+'! '+ico('flame');
+  document.body.appendChild(t);sfx.combo();setTimeout(function(){t.remove();},1100);}
+
+/* ripple + particle push */
+document.addEventListener('pointerdown',function(e){
+  var el=e.target.closest('.btn,.opt,.bin,.mode,.iconbtn,.pw');
+  if(el){var r=el.getBoundingClientRect(),rip=document.createElement('span');
+    rip.className='rip';
+    if(el.classList.contains('opt')||el.classList.contains('mode')||el.classList.contains('iconbtn')||el.classList.contains('pw'))rip.classList.add('dark');
+    var d=Math.max(r.width,r.height)*2.2;rip.style.width=rip.style.height=d+'px';
+    rip.style.left=(e.clientX-r.left)+'px';rip.style.top=(e.clientY-r.top)+'px';
+    el.appendChild(rip);setTimeout(function(){rip.remove();},620);}
+  for(var i=0;i<parts.length;i++){var p=parts[i],dx=p.x-e.clientX,dy=p.y-e.clientY,dd=Math.sqrt(dx*dx+dy*dy)||1;
+    if(dd<170){var f=(1-dd/170)*3.4;p.vx=clamp(p.vx+dx/dd*f,-3,3);p.vy=clamp(p.vy+dy/dd*f,-3,3);}}
+  ripples.push({x:e.clientX,y:e.clientY,r:6,a:.35});
+},{passive:true});
+
+/* ============ splash title ============ */
+(function(){var words=['Зат','алмасу','Арена'],h='',li=0;
+  for(var w=0;w<words.length;w++){var inner='';
+    for(var k=0;k<words[w].length;k++){inner+='<span class="ltr" style="animation-delay:'+(0.5+li*0.07).toFixed(2)+'s">'+words[w][k]+'</span>';li++;}
+    h+='<span class="word">'+inner+'</span>';}
+  $('splashTitle').innerHTML='<span class="grad-text">'+h+'</span>';})();
+$('startBtn').addEventListener('click',function(){
+  buzz(18);sfx.whoosh();
+  var sh=$('shock');sh.classList.remove('go');void sh.offsetWidth;sh.classList.add('go');
+  flash();burstConfetti(70);
+  setTimeout(function(){show('home');},240);});
+$('orb').addEventListener('click',function(){$('startBtn').click();});
+
+/* ============ session ============ */
+var best=+(localStorage.getItem('za_best2')||0);
+$('bestScore').textContent=best;
+var session={mode:null,score:0,correct:0,total:0,maxStreak:0,streak:0};
+function streakBump(){session.streak++;session.maxStreak=Math.max(session.maxStreak,session.streak);
+  if(session.streak===3||session.streak===5||session.streak===7)comboPop(session.streak);}
+function streakKill(){session.streak=0;}
+function setStreakUI(el,badge){el.classList.toggle('on',session.streak>=2);
+  el.classList.toggle('hot',session.streak>=4);
+  el.querySelector('span').textContent=session.streak;}
+
+/* ============ QUIZ ============ */
+var QUIZ_POOL=[
+ {c:'Зат алмасу',q:'Зат алмасу дегеніміз не?',o:['Қоректік заттардың жасуша ішінде өзгеру үрдісі','Тамақтың асқазан арқылы жылжуы','Қанның тамырлармен айналымы','Өкпе арқылы газ алмасу'],a:0,e:'Зат алмасу — қоректік заттардың сіңірілуінен соңғы өнімдер түзілгенге дейінгі жасуша ішіндегі өзгеру үрдісі. Барлық жасушаларда үздіксіз жүреді.'},
+ {c:'Анаболизм',q:'Ассимиляция (анаболизм) дегеніміз не?',o:['Ағза үшін қажетті күрделі заттардың түзілуі','Күрделі заттардың ыдырауы','Судың бүйрек арқылы шығуы','Тамақтың шайналуы'],a:0,e:'Анаболизм — күрделі заттардың түзілу үрдісі. Катаболизм — ыдырап, энергия бөлу үрдісі. Екеуі тығыз байланысты және зат алмасудың негізін құрайды.'},
+ {c:'Катаболизм',q:'Диссимиляция (катаболизм) кезінде не жүреді?',o:['Күрделі заттар ыдырап, энергия бөлінеді','Жаңа тіндер құрылады','Тек заттар синтезделеді','Тек су ғана шығындалады'],a:0,e:'Катаболизмде күрделі заттар ыдырайды да, энергия (жылу) бөлінеді — ол жүрек, бауыр, өкпе жұмысына және температураға жұмсалады.'},
+ {c:'Жас ерекшелігі',q:'20 жасқа дейін зат алмасуда қай үрдіс басым?',o:['Ассимиляция (өсу мен даму)','Диссимиляция (қартаю)','Май жиналу','Тек тепе-теңдік'],a:0,e:'20 жасқа дейін — ассимиляция басым; 20–40 жаста тепе-теңдік; 40–60 жаста май жиналу күшейеді; 60 жастан кейін диссимиляция басым.'},
+ {c:'Жас ерекшелігі',q:'60 жастан кейін ағзада қай үрдіс басым болады?',o:['Диссимиляция (қартаю кезеңі)','Ассимиляция','Гликоген жиналу','Глюконеогенез'],a:0,e:'60 жастан кейін диссимиляция үрдісі басым болады — бұл қартаю кезеңі.'},
+ {c:'Өлшем бірлік',q:'1 ккал неше кДж-ға тең?',o:['4,184 кДж','17 кДж','9 кДж','2,4 кДж'],a:0,e:'Энергия бірліктері: килокалория (ккал) және килоджоуль (кДж). 1 ккал = 4,184 кДж.'},
+ {c:'Ақуыз алмасуы',q:'Аммиак (NH₃) қай мүшеде зәрнәрге айналады?',o:['Бауырда','Бүйректе','Өкпеде','Жүректе'],a:0,e:'Аммиак бауырда зәрнәрге айналады да, несеппен шығарылады. Ақуыз жетіспесе, ағза өз тін ақуыздарын жұмсайды — ақуыздық ашығу.'},
+ {c:'Ақуыз алмасуы',q:'Мыналардың қайсысы — ақаулы ақуызға мысал?',o:['Желатин','Сиыр еті','Тауық жұмыртқасы','Сүт'],a:0,e:'Барлық қажетті амин қышқылдары жоқ ақуыздар — ақаулы (бидай ақуызы, желатин). Жануар текті ақуыздардың көпшілігі — толық құнды.'},
+ {c:'Көмірсу алмасуы',q:'Глюкоза қор ретінде бауырда неге айналады?',o:['Гликогенге','Глицеринге','Зәрнәрге','Сүт қышқылына'],a:0,e:'Глюкоза бауырда гликогенге айналып қорға жиналады; қажет кезде гликоген ыдырап, глюкоза болып қайтадан қанға өтеді.'},
+ {c:'Көмірсу алмасуы',q:'Глюконеогенез дегеніміз не?',o:['Майлардан көмірсулардың түзілуі','Көмірсулардың майға айналуы','Ақуыздың ыдырауы','Судың булануы'],a:0,e:'Майлардан көмірсулардың түзілуі — глюконеогенез. Көмірсулар сонымен қатар аминқанттар (глюкозамин) түзуге қатысады.'},
+ {c:'Көмірсу алмасуы',q:'Көмірсулардың негізгі көзі қайсы?',o:['Өсімдік тектес тағам','Ет','Балық майы','Жұмыртқа'],a:0,e:'Көмірсулардың негізгі көзі — өсімдік тектес тағам. Олар моносахаридтерге дейін ыдырап, глюкоза түрінде қанға өтеді.'},
+ {c:'Су алмасуы',q:'Қан плазмасында судың мөлшері қандай?',o:['92%-ға дейін','50%','66%','30%-ға дейін'],a:0,e:'Су — тіршіліктің негізі: барлық биохимиялық реакциялар суда жүреді. Бұлшықетте су 78–80%, қан плазмасында 92%-ға дейін.'},
+ {c:'Су алмасуы',q:'Су ағзадан қай жолдармен шығындалады?',o:['Бүйрек, тері, өкпе арқылы','Тек тер арқылы','Тек несеп арқылы','Тек өкпе арқылы'],a:0,e:'Су бүйрек, тері және өкпе арқылы шығындалады. Сусыз ағза өмір сүре алмайды.'},
+ {c:'Минералдар',q:'Йод ағзада не үшін қажет?',o:['Қалқанша без гормондары үшін','Гемоглобин құрамы үшін','Тек сүйек үшін','Тек тер шығару үшін'],a:0,e:'Темір — гемоглобин құрамында; йод — қалқанша без гормондары үшін; кальций мен фосфор — жүйке-бұлшықет жүйесі үшін маңызды.'},
+ {c:'Минералдар',q:'Темір ағзада қай заттың құрамында болады?',o:['Гемоглобин','Инсулин','Тироксин','Гастрин'],a:0,e:'Темір — гемоглобиннің құрамдас бөлігі. Минералдар тер, несеп арқылы үнемі жоғалады, сондықтан тағаммен толықтыру керек.'},
+ {c:'Минералдар',q:'Қай минералды тұз көбіне жетіспуі мүмкін?',o:['Натрий хлориді (ас тұзы)','Кальций фосфаты','Темір оксиді','Калий бромиді'],a:0,e:'Ас тұзы (NaCl) көбіне жетіспейді, әсіресе өсімдік тектес тағамды көп қолданғанда. Кәдімгі аралас тағам минералдарға жеткілікті.'},
+ {c:'Энергия көздері',q:'Жүрек бұлшықеті негізінен нені пайдаланады?',o:['Май қышқылдарын','Тек сүт қышқылын','Тек су','Минералды тұздарды'],a:0,e:'Қаңқалық бұлшықет пен жүйке жасушалары — көбіне глюкозаны, ал жүрек бұлшықеті — май қышқылдарын қажет етеді.'},
+ {c:'Сіңімділік',q:'Тәжірибеде тағамның орташа сіңімділігі қанша деп есептеледі?',o:['90%','50%','100%','70%'],a:0,e:'Жануар тектіде 95%-ге дейін, өсімдік тектіде ~80%, аралас тағамда 82–90%. Орташа есеппен 90% деп алынады.'},
+ {c:'Калораж',q:'Майдың энергетикалық коэффициенті қандай?',o:['9 ккал/г','4 ккал/г','7 ккал/г','2 ккал/г'],a:0,e:'Коэффициенттер: ақуыз — 4, көмірсу — 4, май — 9 ккал/г. Сондықтан майлардың энергетикалық құндылығы ең жоғары.'},
+ {c:'Калораж',q:'Жалпы калораж бен таза калораждың айырмашылығы неде?',o:['Таза калоражда сіңімділік ескеріледі','Екеуі бірдей','Жалпы калораж — дәл мән','Таза калораж — май мөлшері'],a:0,e:'Жалпы калораж — тағам құрамының энергиялық құндылығы; таза калораж — сіңімділік ескерілген калораж. Мысалы, күріш — 2775 ккал/кг.'},
+ {c:'Тағам топтары',q:'Шоколад пен халва қай энергетикалық топқа жатады?',o:['Өте жоғары (400–900 ккал)','Жоғары (250–400 ккал)','Орташа (100–250 ккал)','Төмен (<100 ккал)'],a:0,e:'Өте жоғары: шоколад, майлар, халва. Жоғары: ұн, жарма, макарон, қант. Орташа: нан, ет, жұмыртқа. Төмен: сүт, балық, көкөніс, жеміс.'},
+ {c:'Зат алмасу',q:'Жасуша мен тіндерді құруға қажет заттарды синтездейтін бағыт?',o:['Пластикалық алмасу','Су алмасу','Энергетикалық алмасу','Дәрумендік алмасу'],a:0,e:'Пластикалық алмасу — жасуша мен тіндерді құруға қажет заттардың синтезі; энергетикалық алмасу — тіршілікке қажет энергияның түзілуі.'},
+ {c:'Гомеостаз',q:'Зат алмасу ағзада қандай тұрақтылықты сақтайды?',o:['Гомеостаз — ішкі ортаның тұрақтылығы','Тек дене бітімін','Тек қан тобын','Ештеңені сақтамайды'],a:0,e:'Зат алмасу барлық жасушаларда үздіксіз жүріп, тіршілік әрекетін қамтамасыз етеді және ішкі ортаның тұрақтылығын — гомеостазды сақтайды.'},
+ {c:'Май алмасуы',q:'Майлар ас қорыту кезінде неге ыдырайды?',o:['Глицерин мен май қышқылдарына','Амин қышқылдарына','Глюкозаға','Зәрнәрге'],a:0,e:'Майлар глицерин мен май қышқылдарына ыдырайды. Қайта синтезделген майлар энергия көзі немесе құрылымдық элемент ретінде жұмсалады.'},
+ {c:'Дереккөз',q:'Толық ыдырағанда майлар неге айналады?',o:['СО₂ және Н₂О-ға','Тек глюкозаға','Аммиакқа','Гликогенге'],a:0,e:'Энергия көзі ретінде майлар толық ыдырап, СО₂ және Н₂О-ға айналады. Глюкоза бұлшықетте сүт қышқылына, кейін СО₂ мен Н₂О-ға дейін тотығады.'}
+];
+var quiz={list:[],idx:0,tStart:0,dur:18000,extra:0,raf:0,locked:false,shield:false,
+  used:{fifty:false,freeze:false,shield:false},result:[]};
+function startQuiz(){session={mode:'quiz',score:0,correct:0,total:0,maxStreak:0,streak:0};
+  quiz.list=shuffle(QUIZ_POOL).slice(0,10);quiz.idx=0;quiz.result=[];
+  quiz.used={fifty:false,freeze:false,shield:false};quiz.shield=false;
+  ['pwFifty','pwFreeze','pwShield'].forEach(function(i){$(i).classList.remove('used','armed');});
+  var dots='';for(var i=0;i<10;i++)dots+='<span></span>';$('qDots').innerHTML=dots;
+  show('quiz');renderQuiz();}
+function renderQuiz(){var q=quiz.list[quiz.idx];
+  $('qCounter').textContent=(quiz.idx+1)+' / 10';
+  $('qScore').textContent=session.score;
+  $('qProg').style.width=(quiz.idx/10*100)+'%';
+  setStreakUI($('qStreak'),true);
+  var ds=$('qDots').children;for(var i=0;i<ds.length;i++){ds[i].className=i===quiz.idx?'now':(quiz.result[i]===1?'done':(quiz.result[i]===0?'miss':''));}
+  var order=shuffle([0,1,2,3]),keys=['А','Б','В','Г'],h='<div class="qhead"><span class="qcat">'+q.c+'</span>'+
+    '<div class="tqwrap" id="tqw"><svg class="tqring" viewBox="0 0 48 48"><circle class="tqbg" cx="24" cy="24" r="20"/>'+
+    '<circle class="tqfg" id="tqfg" cx="24" cy="24" r="20"/></svg><div class="tqnum" id="tqn">18</div></div></div>'+
+    '<div class="qtext">'+q.q+'</div><div class="opts">';
+  for(var i2=0;i2<4;i2++){h+='<button class="opt" data-i="'+order[i2]+'"><span class="k">'+keys[i2]+'</span><span>'+q.o[order[i2]]+'</span></button>';}
+  h+='</div>';
+  var card=$('qCard');card.innerHTML=h;card.style.animation='none';void card.offsetWidth;card.style.animation='';
+  var bs=card.querySelectorAll('.opt');for(var b=0;b<bs.length;b++)bs[b].addEventListener('click',onQuizAnswer);
+  $('qExplain').classList.remove('show');$('qNextWrap').classList.remove('show');
+  quiz.locked=false;quiz.tStart=performance.now();quiz.extra=0;quiz.lastTick=99;
+  cancelAnimationFrame(quiz.raf);tickQuiz();}
+function tickQuiz(now){if(quiz.locked)return;
+  now=now||performance.now();
+  var total=quiz.dur+quiz.extra,el=now-quiz.tStart,left=Math.max(0,total-el),sec=Math.ceil(left/1000);
+  var ring=$('tqfg');if(!ring)return;
+  ring.style.strokeDashoffset=String(125.66*(1-left/total));
+  var wrap=$('tqw');wrap.classList.toggle('low',left<6000);
+  $('tqn').textContent=sec;
+  if(sec<=5&&sec!==quiz.lastTick&&sec>0){quiz.lastTick=sec;sfx.tick();buzz(6);}
+  if(left<=0){quizTimeout();return;}
+  quiz.raf=requestAnimationFrame(tickQuiz);}
+function quizAllOptions(){return $('qCard').querySelectorAll('.opt');}
+function revealAnswer(right){var all=quizAllOptions();
+  for(var i=0;i<all.length;i++){all[i].classList.add('dim');
+    if(+all[i].dataset.i===right)all[i].classList.add('correct');}}
+function showExplain(html){var ex=$('qExplain');ex.innerHTML=html;ex.classList.add('show');
+  $('qNextWrap').classList.add('show');$('qNext').textContent=quiz.idx===9?'Нәтиже ›':'Келесі ›';}
+function onQuizAnswer(ev){var btn=ev.target.closest('.opt');
+  if(quiz.locked||btn.classList.contains('dim'))return;
+  quiz.locked=true;cancelAnimationFrame(quiz.raf);
+  var q=quiz.list[quiz.idx],chosen=+btn.dataset.i,ok=chosen===q.a;
+  if(ok){var timeBonus=Math.round((quiz.dur+quiz.extra-(performance.now()-quiz.tStart))/quiz.dur*4);
+    streakBump();session.correct++;quiz.result[quiz.idx]=1;
+    var pts=10+Math.min(session.streak-1,4)*2+clamp(timeBonus,0,4);
+    session.score+=pts;quizAllOptions();revealAnswer(q.a);
+    sfx.correct();buzz(14);burstMini(btn);
+    showExplain('✅ <b>Дұрыс! +'+pts+'</b>'+(timeBonus>=3?' <span style="color:#f59e0b;font-weight:800">⚡ Жылдамдық сыйлығы!</span>':'')+'<br>'+q.e);
+    if(session.streak>=5){burstConfetti(40);}}
+  else if(quiz.shield){quiz.shield=false;$('pwShield').classList.remove('armed');
+    quiz.result[quiz.idx]=1;session.correct++;revealAnswer(q.a);
+    sfx.power();toast('Қалқан сақтады! Комбо үзілмеді');
+    showExplain('<b>Қалқан жұмыс істеді.</b><br>'+q.e);}
+  else{streakKill();quiz.result[quiz.idx]=0;btn.classList.add('wrong');revealAnswer(q.a);
+    sfx.wrong();buzz([50,40,50]);shakeApp();
+    showExplain('❌ <b>Қате.</b><br>'+q.e);}
+  session.total++;
+  $('qScore').textContent=session.score;setStreakUI($('qStreak'),true);}
+function quizTimeout(){quiz.locked=true;cancelAnimationFrame(quiz.raf);streakKill();
+  quiz.result[quiz.idx]=0;session.total++;
+  var q=quiz.list[quiz.idx];revealAnswer(q.a);
+  sfx.wrong();buzz([60,40,60]);shakeApp();$('tqn').textContent='⏰';
+  showExplain('⏰ <b>Уақыт бітті!</b><br>'+q.e);}
+$('qNext').addEventListener('click',function(){sfx.click();buzz(8);quiz.idx++;
+  if(quiz.idx>=10){$('qProg').style.width='100%';endSession();}else renderQuiz();});
+/* powerups */
+$('pwFifty').addEventListener('click',function(){if(quiz.locked||quiz.used.fifty)return;
+  quiz.used.fifty=true;this.classList.add('used');sfx.power();toast('50 / 50 — екі артық жауап алынды');
+  var q=quiz.list[quiz.idx],all=quizAllOptions(),wrongs=[];
+  for(var i=0;i<all.length;i++)if(+all[i].dataset.i!==q.a)wrongs.push(all[i]);
+  wrongs=shuffle(wrongs).slice(0,2);
+  wrongs.forEach(function(w){w.classList.add('vanish');});});
+$('pwFreeze').addEventListener('click',function(){if(quiz.locked||quiz.used.freeze)return;
+  quiz.used.freeze=true;this.classList.add('used');sfx.power();toast('Уақыт баяулады: +6 секунд');
+  var wrap=$('tqw');wrap.classList.remove('low');
+  quiz.tStart-=6000;quiz.extra=0;});
+$('pwShield').addEventListener('click',function(){if(quiz.locked||quiz.used.shield)return;
+  quiz.used.shield=true;quiz.shield=true;this.classList.add('used','armed');
+  sfx.power();toast('Қалқан: келесі қате комбодан сақтайды');});
+
+/* ============ SORT ============ */
+var FOODS=[
+ {ic:'steak',n:'Майсыз сиыр еті',t:'protein'},{ic:'chicken',n:'Тауық еті',t:'protein'},{ic:'fish',n:'Балық',t:'protein'},
+ {ic:'egg',n:'Тауық жұмыртқасы',t:'protein'},{ic:'milk',n:'Сүт',t:'protein'},{ic:'beans',n:'Бұршақ',t:'protein'},
+ {ic:'butter',n:'Сары май',t:'fat'},{ic:'oil',n:'Күнжірт майы',t:'fat'},{ic:'nut',n:'Жаңғақ',t:'fat'},
+ {ic:'choco',n:'Шоколад',t:'fat'},{ic:'halva',n:'Халва',t:'fat'},{ic:'bacon',n:'Майлы ет',t:'fat'},
+ {ic:'bread',n:'Қара бидай наны',t:'carb'},{ic:'rice',n:'Күріш',t:'carb'},{ic:'potato',n:'Картоп',t:'carb'},
+ {ic:'slice',n:'Кептірілген алма',t:'carb'},{ic:'pasta',n:'Макарон',t:'carb'},{ic:'candy',n:'Қант',t:'carb'},{ic:'carrot',n:'Сәбіз',t:'carb'}
+];
+var sortG={list:[],idx:0,raf:0};
+function startSort(){session={mode:'sort',score:0,correct:0,total:0,maxStreak:0,streak:0};
+  sortG.list=shuffle(FOODS).slice(0,12);sortG.idx=0;show('sort');nextFood(true);}
+function nextFood(first){
+  if(sortG.idx>=12){cancelAnimationFrame(sortG.raf);endSession();return;}
+  var f=sortG.list[sortG.idx];
+  $('sCounter').textContent=(sortG.idx+1)+' / 12';
+  $('sScore').textContent=session.score;setStreakUI($('sStreak'),true);
+  var card=$('foodCard');
+  card.classList.remove('gone','bad-anim');
+  if(!first){card.style.animation='none';void card.offsetWidth;card.style.animation='';}
+  $('fEmoji').innerHTML=ico(f.ic);$('fName').textContent=f.n;
+  var start=performance.now(),dur=3800;
+  cancelAnimationFrame(sortG.raf);
+  (function tick(now){var k=Math.max(0,1-(now-start)/dur);
+    $('sTimer').style.transform='scaleX('+k+')';
+    if(now-start>=dur){sortTimeout();return;}
+    sortG.raf=requestAnimationFrame(tick);})(start);}
+function sortFloat(txt,cls){var s=document.createElement('div');s.className='float-score '+cls;s.textContent=txt;
+  $('foodStage').appendChild(s);setTimeout(function(){s.remove();},950);}
+function sortTimeout(){session.total++;streakKill();quizNoSound();
+  sortFloat('⏰ уақыт!','minus');var card=$('foodCard');card.classList.add('bad-anim');
+  setTimeout(function(){card.classList.add('gone');sortG.idx++;setTimeout(nextFood,240);},440);}
+function quizNoSound(){sfx.wrong();buzz([40,40,40]);}
+function onBin(bin){if(sortG.idx>=12)return;
+  var f=sortG.list[sortG.idx];session.total++;
+  var card=$('foodCard'),ok=bin===f.t;
+  if(ok){streakBump();session.correct++;
+    var pts=8+Math.min(session.streak-1,4)*2;session.score+=pts;
+    sfx.correct();buzz(12);sortFloat('+'+pts,'plus');burstMini($('fEmoji'));
+    if(session.streak>=4)burstConfetti(25);}
+  else{streakKill();sfx.wrong();buzz(55);sortFloat('✕ '+{protein:'Ақуыз',fat:'Май',carb:'Көмірсу'}[f.t],'minus');
+    card.classList.add('bad-anim');}
+  cancelAnimationFrame(sortG.raf);
+  setTimeout(function(){card.classList.add('gone');sortG.idx++;setTimeout(nextFood,250);},ok?150:470);}
+(function(){var bins=document.querySelectorAll('.bin');
+  for(var i=0;i<bins.length;i++)bins[i].addEventListener('click',function(){onBin(this.dataset.bin);});})();
+
+/* ============ CALC ============ */
+var MEALS=[
+ {n:'Негізгі таңғы ас',p:20,f:10,c:45},{n:'Түскі ас: күріш + ет',p:30,f:12,c:60},
+ {n:'Жеңіл кешкі ас',p:15,f:5,c:20},{n:'Спортшы тағамы',p:35,f:15,c:70},
+ {n:'Жемісті тағам',p:5,f:3,c:40},{n:'Нан + сары май + ірімшік',p:18,f:22,c:30},
+ {n:'Күріш ботқасы',p:7,f:1,c:50},{n:'Жұмыртқалы таңғы ас',p:18,f:14,c:8},
+ {n:'Балық + көкөніс',p:25,f:8,c:15},{n:'Шоколад + сүт',p:9,f:12,c:35}
+];
+var calc={list:[],idx:0,timer:0};
+function startCalc(){session={mode:'calc',score:0,correct:0,total:0,maxStreak:0,streak:0};
+  calc.list=shuffle(MEALS).slice(0,8);calc.idx=0;show('calc');renderCalc();}
+function renderCalc(){if(calc.idx>=8){clearInterval(calc.timer);endSession();return;}
+  var m=calc.list[calc.idx],ans=m.p*4+m.f*9+m.c*4;
+  $('cCounter').textContent=(calc.idx+1)+' / 8';
+  $('cScore').textContent=session.score;
+  $('cProg').style.width=(calc.idx/8*100)+'%';setStreakUI($('cStreak'),true);
+  $('cCard').innerHTML='<div class="memeal">'+ico(pick(['plate','bowl','tray','cup','cheese']))+'</div>'+
+    '<div class="mname">'+m.n+'</div><div class="macrogrid">'+
+    '<div class="macro"><div class="mv">'+m.p+' г</div><div class="ml">Ақуыз ·4</div></div>'+
+    '<div class="macro"><div class="mv">'+m.f+' г</div><div class="ml">Май ·9</div></div>'+
+    '<div class="macro"><div class="mv">'+m.c+' г</div><div class="ml">Көмірсу ·4</div></div></div>'+
+    '<div class="formula-hint">ккал = ақуыз×4 + май×9 + көмірсу×4</div>';
+  var opts=[ans];
+  while(opts.length<4){var d=ans+pick([-20,-15,-10,-5,5,10,15,20])+pick([-4,0,0,4]);
+    if(d>0&&opts.indexOf(d)===-1)opts.push(d);}
+  opts=shuffle(opts);
+  var keys=['А','Б','В','Г'],h='';
+  for(var i=0;i<4;i++)h+='<button class="opt" data-v="'+opts[i]+'"><span class="k">'+keys[i]+'</span><span>'+opts[i]+' ккал</span></button>';
+  var o=$('cOpts');o.innerHTML=h;
+  var bs=o.querySelectorAll('.opt');for(var b=0;b<bs.length;b++)bs[b].addEventListener('click',onCalcAnswer);
+  clearInterval(calc.timer);
+  var left=15;$('cTime').textContent=left;$('cTime').classList.remove('low');$('cTimer').style.transform='scaleX(1)';
+  calc.timer=setInterval(function(){left--;$('cTime').textContent=Math.max(left,0);
+    $('cTimer').style.transform='scaleX('+(left/15)+')';
+    $('cTime').classList.toggle('low',left<=5);
+    if(left<=4&&left>0)sfx.tick();
+    if(left<=0){clearInterval(calc.timer);calcTimeout();}},1000);}
+function calcFeedback(ok,pts){if(ok){streakBump();session.correct++;session.score+=pts;sfx.correct();buzz(14);
+    if(session.streak>=4)burstConfetti(25);}
+  else{streakKill();sfx.wrong();buzz(60);shakeApp();}
+  session.total++;
+  $('cScore').textContent=session.score;setStreakUI($('cStreak'),true);
+  setTimeout(renderCalc,ok?800:1500);}
+function onCalcAnswer(ev){var btn=ev.target.closest('.opt');if(btn.classList.contains('dim'))return;
+  clearInterval(calc.timer);
+  var m=calc.list[calc.idx],ans=m.p*4+m.f*9+m.c*4,all=$('cOpts').querySelectorAll('.opt');
+  for(var i=0;i<all.length;i++){all[i].classList.add('dim');if(+all[i].dataset.v===ans)all[i].classList.add('correct');}
+  var ok=+btn.dataset.v===ans;if(!ok)btn.classList.add('wrong');
+  var speed=+(+$('cTime').textContent);
+  calcFeedback(ok,ok?(12+Math.min(session.streak-1,4)*3+(speed>10?4:0)):0);
+  if(ok)burstMini(btn);}
+function calcTimeout(){var m=calc.list[calc.idx],ans=m.p*4+m.f*9+m.c*4,all=$('cOpts').querySelectorAll('.opt');
+  for(var i=0;i<all.length;i++){all[i].classList.add('dim');if(+all[i].dataset.v===ans)all[i].classList.add('correct');}
+  $('cTime').textContent='⏰';calcFeedback(false,0);}
+
+/* ============ RESULT ============ */
+function endSession(){
+  var pct=session.total?Math.round(session.correct/session.total*100):0;
+  var maxScore={quiz:160,sort:200,calc:150}[session.mode]||160;
+  var ratio=Math.min(1,session.score/maxScore);
+  show('result');
+  $('rScore').textContent='0';$('ringFg').style.strokeDashoffset='478';
+  var target=session.score,t1=performance.now();
+  (function count(now){var k=Math.min(1,(now-t1)/1400),e=1-Math.pow(1-k,3);
+    $('rScore').textContent=Math.round(target*e);if(k<1)requestAnimationFrame(count);})(t1);
+  setTimeout(function(){$('ringFg').style.strokeDashoffset=String(478*(1-Math.max(.08,ratio)));},120);
+  $('rCorrect').textContent=session.correct+' / '+session.total;
+  $('rStreak').textContent='×'+session.maxStreak;
+  $('rAcc').textContent=pct+'%';
+  var rank,sub;
+  if(pct>=90){rank='[trophy] Биохимия чемпионы';sub='Керемет! Зат алмасудың патшасысың — ағза енді сенің қолыңда.';}
+  else if(pct>=70){rank='[flame] Зат алмасу шебері';sub='Тамаша нәтиже! Микронутриенттер — енді досың.';}
+  else if(pct>=45){rank='[star] Денсаулық қорғаушы';sub='Жақсы бастама. Тағы бір кезек ойна — анаболизм өседі!';}
+  else{rank='[apple] Жаңадан бастаушы';sub='Білімді сіңір (ассимиляция!) — қайта ойна, бәрі шығады.';}
+  var rh=$('rRank'),html='',di=0,sp=rank.split(' ');
+  for(var i=0;i<sp.length;i++){var word=sp[i];
+    if(word.charAt(0)==='['){html+=ico(word.slice(1,-1));continue;}
+    var w='<span class="word" style="display:inline-block;overflow:hidden;vertical-align:top;margin:0 4px">';
+    for(var k=0;k<word.length;k++){w+='<span class="ltr" style="animation-delay:'+(0.35+di*0.045).toFixed(2)+'s">'+word[k]+'</span>';di++;}
+    html+=w+'</span> ';}
+  rh.innerHTML='<span class="grad-text" style="white-space:normal">'+html+'</span>';
+  $('rSub').textContent=sub;
+  var rec=false;
+  if(session.score>best){best=session.score;try{localStorage.setItem('za_best2',best);}catch(e){}rec=true;$('bestScore').textContent=best;}
+  $('rRecord').classList.toggle('show',rec);
+  if(pct>=70){sfx.win();buzz([20,60,20,60,40]);burstConfetti(rec?180:120);}
+  else buzz(30);}
+$('rHome').addEventListener('click',function(){sfx.click();show('home');});
+$('rAgain').addEventListener('click',function(){sfx.whoosh();
+  if(session.mode==='quiz')startQuiz();else if(session.mode==='sort')startSort();else startCalc();});
+
+/* ============ NAV ============ */
+(function(){var ms=document.querySelectorAll('.mode');
+  for(var i=0;i<ms.length;i++)ms[i].addEventListener('click',function(){
+    sfx.click();buzz(10);flash();var g=this.dataset.go;
+    setTimeout(function(){if(g==='quiz')startQuiz();else if(g==='sort')startSort();else startCalc();},150);});
+  var bs=document.querySelectorAll('[data-back]');
+  for(var j=0;j<bs.length;j++)bs[j].addEventListener('click',function(){
+    sfx.click();buzz(8);cancelAnimationFrame(sortG.raf);cancelAnimationFrame(quiz.raf);clearInterval(calc.timer);show('home');});})();
+document.addEventListener('contextmenu',function(e){e.preventDefault();});
+})();
+</script>
+</body>
+</html>
