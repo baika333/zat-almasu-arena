@@ -136,11 +136,12 @@
   .streak-badge.on{opacity:1;color:var(--amber)}
   .streak-badge.hot{color:#f97316;text-shadow:0 0 14px rgba(249,115,22,.65);animation:hotPulse .8s ease-in-out infinite}
   @keyframes hotPulse{50%{transform:scale(1.15) rotate(-4deg)}}
-  .pbar{height:9px;border-radius:99px;background:rgba(16,20,24,.07);overflow:visible;margin-bottom:10px;position:relative;
+  .pbar{height:9px;border-radius:99px;background:rgba(16,20,24,.07);overflow:visible;margin:0 7px 10px;position:relative;
     box-shadow:inset 0 0 0 1px rgba(16,20,24,.04)}
-  .pbar i{display:block;height:100%;border-radius:99px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2),#e26fd0);
+  .pbar i{display:block;height:100%;border-radius:99px;width:0;min-width:8px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2),#e26fd0);
     background-size:200% 100%;animation:gradMove 3s linear infinite;transition:width .5s cubic-bezier(.2,.8,.2,1);position:relative}
-  .pbar i::after{content:'';position:absolute;right:-2px;top:50%;width:13px;height:13px;margin-top:-6.5px;border-radius:50%;
+  .pbar i::after{content:'';position:absolute;left:100%;top:50%;margin-left:-6.5px;width:13px;height:13px;margin-top:-6.5px;border-radius:50%;
     background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 14px 5px rgba(155,92,246,.65)}
   .dots{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
   .dots span{width:8px;height:8px;border-radius:50%;background:rgba(16,20,24,.1);transition:all .35s}
@@ -540,11 +541,14 @@
     100%{opacity:0;transform:translateY(-72px) scale(2.4)}}
   .plane .pil{width:90px;height:90px;animation:planeBob 1.7s ease-in-out infinite;
     filter:drop-shadow(0 14px 16px rgba(16,48,96,.35));transform:scaleX(-1)}
-  .plane .qb{position:absolute;top:-34px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;
+  .plane .qb{position:absolute;top:-34px;left:50%;translate:calc(-50% + var(--bx,0px)) 0;
+    display:flex;align-items:center;gap:5px;max-width:min(300px,calc(100vw - 22px));
     background:rgba(255,255,255,.94);border:2px solid var(--accent);border-radius:15px;padding:5px 10px 5px 7px;
     font-size:11.5px;font-weight:900;letter-spacing:.2px;color:#33415f;white-space:nowrap;
-    box-shadow:0 12px 22px -8px rgba(12,32,70,.45);animation:popIn .35s cubic-bezier(.2,1.5,.4,1) both}
-  .plane .qb::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-6px;width:12px;height:12px;
+    box-shadow:0 12px 22px -8px rgba(12,32,70,.45);animation:qbPop .35s cubic-bezier(.2,1.5,.4,1) both}
+  @keyframes qbPop{from{opacity:0;scale:.6}to{opacity:1;scale:1}}
+  .plane .qb .qt{overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .plane .qb::after{content:'';position:absolute;bottom:-7px;left:calc(50% - var(--bx,0px));margin-left:-6px;width:12px;height:12px;
     background:rgba(255,255,255,.94);border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(45deg)}
   .plane .qb .ic{width:15px;height:15px}
   .plane .qb .qd{width:6px;height:6px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 0 rgba(239,68,68,.6);
@@ -1806,11 +1810,15 @@ function spawnPlane(fw){var q=nextPlaneQ();if(!q)return;
   el.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
   el.innerHTML='<div class="aura"></div><div class="trail"><i></i><i></i><i></i><i></i></div>'
     +'<div class="pil">'+ico(cr.ic)+'</div>'
-    +'<div class="qb">'+ico(q.own?'pencil':'brain')+'<span class="qd"></span>'+esc(q.c)+'</div>';
+    +'<div class="qb">'+ico(q.own?'pencil':'brain')+'<span class="qd"></span><span class="qt">'+esc(q.c)+'</span></div>';
   var it={el:el,x:x,y:y,size:size,cr:cr,hot:false,q:q,dead:false,
     sp:(25+pg.wave*4.5)*(cr.boss?.78:1)*(0.85+Math.random()*0.4)};
   el.addEventListener('click',function(){openPlaneQ(it);});
-  $('planeField').appendChild(el);pg.items.push(it);}
+  $('planeField').appendChild(el);pg.items.push(it);
+  var b=el.querySelector('.qb'),bw=b?b.offsetWidth:0;
+  if(b&&bw){var c=x+size/2,lo=8+bw/2,hi=fw-8-bw/2,bx=0;
+    if(lo>hi)bx=fw/2-c;else if(c<lo)bx=lo-c;else if(c>hi)bx=hi-c;
+    if(bx)b.style.setProperty('--bx',bx.toFixed(1)+'px');}}
 function dropPlane(it){if(it.el&&it.el.parentNode)it.el.parentNode.removeChild(it.el);
   var k=pg.items.indexOf(it);if(k>-1)pg.items.splice(k,1);}
 function boomPlane(it){it.dead=true;it.hot=false;it.el.classList.add('boom');it.el.classList.remove('hot');
