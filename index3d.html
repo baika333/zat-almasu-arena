@@ -39,11 +39,23 @@ canvas{display:block;width:100%;height:100%}
   display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:16px;font-weight:900;font-size:14px}
 #hStreak.hot{color:#b45309;box-shadow:0 0 0 2px rgba(245,158,11,.6),0 14px 26px -10px rgba(245,158,11,.6)}
 
+/* дыбыс түймесі */
+#btnSnd{position:fixed;right:10px;top:calc(64px + env(safe-area-inset-top));z-index:11;width:46px;height:46px;
+  border:0;border-radius:16px;display:grid;place-items:center;cursor:pointer;color:#fff;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;background:rgba(10,25,60,.46);
+  box-shadow:0 14px 26px -14px rgba(6,20,52,.9),inset 0 0 0 1px rgba(255,255,255,.32)}
+#btnSnd:active{transform:scale(.93)}
+#btnSnd svg{width:23px;height:23px}
+#btnSnd .iOff{display:none}
+#btnSnd.muted .iOn{display:none}
+#btnSnd.muted .iOff{display:block}
+#btnSnd.hide{display:none}
+
 /* bottom bar */
-#bar{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:0 12px calc(14px + env(safe-area-inset-bottom));
-  display:flex;gap:9px;justify-content:center}
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:8;padding:0 12px calc(14px + env(safe-area-inset-bottom));
+  display:flex;gap:9px;justify-content:center;pointer-events:none}
 #bar.hide{display:none}
-#bar button{position:relative;flex:1 1 0;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:3px;
+#bar button{position:relative;flex:1 1 0;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:auto;touch-action:manipulation;
   border:0;border-radius:17px;padding:9px 4px 7px;font:inherit;font-weight:900;font-size:10.5px;letter-spacing:.3px;
   color:#33415f;background:rgba(255,255,255,.94);box-shadow:0 14px 28px -12px rgba(6,20,52,.55),inset 0 0 0 1px rgba(255,255,255,.7);
   cursor:pointer;transition:transform .12s,opacity .2s}
@@ -66,6 +78,14 @@ h1 span{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-b
 .field{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:16px;background:#fff;
   box-shadow:inset 0 0 0 2px rgba(79,110,247,.22);margin-bottom:12px}
 .field input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-weight:800;font-size:15px;color:#0f172a;background:none}
+.field svg{flex:none;width:20px;height:20px}
+.field .unit{flex:none;font-size:12px;font-weight:900;color:#6b7691}
+.field input[type=number]{flex:none;width:74px;text-align:center;font-size:17px;-moz-appearance:textfield;appearance:textfield}
+.field input[type=number]::-webkit-outer-spin-button,.field input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.field .stp{flex:none;width:36px;height:36px;border:0;border-radius:12px;background:rgba(79,110,247,.14);
+  color:var(--accent);font:inherit;font-weight:900;font-size:20px;line-height:1;display:grid;place-items:center;
+  cursor:pointer;touch-action:manipulation;padding:0}
+.field .stp:active{transform:scale(.92)}
 .seg{display:flex;gap:5px;padding:5px;border-radius:16px;background:rgba(16,20,24,.055);margin-bottom:12px}
 .seg button{flex:1;border:0;background:transparent;font:inherit;font-weight:900;font-size:11px;color:#6b7691;
   padding:9px 3px;border-radius:12px;cursor:pointer;transition:.18s}
@@ -84,12 +104,14 @@ h1 span{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-b
   background:rgba(79,110,247,.11);color:#33488f;font-size:10.5px;font-weight:900;letter-spacing:.4px;margin-bottom:10px}
 
 /* question sheet */
-#sheet{position:fixed;left:0;right:0;bottom:0;display:none;padding:0 10px calc(86px + env(safe-area-inset-bottom));z-index:6}
+#sheet{position:fixed;left:0;right:0;bottom:0;display:none;padding:0 10px calc(98px + env(safe-area-inset-bottom));z-index:6;pointer-events:none}
 #sheet.show{display:block}
-.qcard{border-radius:24px;overflow:hidden;animation:slideUp .32s cubic-bezier(.2,1.1,.3,1) both;
+.qcard{pointer-events:auto;display:flex;flex-direction:column;
+  max-height:calc(100dvh - 122px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  border-radius:24px;overflow:hidden;animation:slideUp .32s cubic-bezier(.2,1.1,.3,1) both;
   box-shadow:0 -18px 52px -14px rgba(6,20,52,.72),0 0 0 1px rgba(255,255,255,.5)}
 @keyframes slideUp{from{opacity:0;translate:0 40px}to{opacity:1;translate:0 0}}
-.qhead{display:flex;align-items:center;gap:10px;padding:12px 13px;background:linear-gradient(100deg,#3f5ce0,#8b4fe8)}
+.qhead{flex:none;display:flex;align-items:center;gap:10px;padding:12px 13px;background:linear-gradient(100deg,#3f5ce0,#8b4fe8)}
 .qhead .badge{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.18);display:grid;place-items:center;flex:0 0 auto}
 .qhead .badge svg{width:32px;height:32px}
 .qhead .who{flex:1;min-width:0;text-align:left}
@@ -105,7 +127,8 @@ h1 span{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-b
 #ring.low .fg{stroke:#ffd166}
 #ring.low b{animation:tick .5s infinite;color:#ffd166}
 @keyframes tick{50%{transform:scale(1.18)}}
-.qbody{background:rgba(255,255,255,.97);padding:14px 13px 13px}
+.qbody{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  background:rgba(255,255,255,.97);padding:14px 13px 13px;touch-action:manipulation}
 #qText{font-size:17px;font-weight:900;line-height:1.28;letter-spacing:-.2px;margin:0 0 10px}
 #qMeta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
 #qMeta .mpill{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;font-size:10.5px;
@@ -114,7 +137,9 @@ h1 span{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-b
 #opts{display:flex;flex-direction:column;gap:8px}
 .opt{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:12px;text-align:left;font:inherit;
   font-weight:800;font-size:14.5px;line-height:1.25;color:#1e2740;background:#f6f8fc;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:rgba(79,110,247,.18);
   box-shadow:inset 0 0 0 1.5px rgba(16,20,24,.06);transition:transform .12s,background .2s,box-shadow .2s}
+.opt>*{pointer-events:none}
 .opt:active{transform:scale(.985)}
 .opt .k{width:26px;height:26px;flex:0 0 auto;border-radius:9px;display:grid;place-items:center;
   font-size:12.5px;font-weight:900;background:rgba(79,110,247,.13);color:var(--accent)}
@@ -215,6 +240,11 @@ h1 span{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-b
   <div class="card pod" id="hStreak" style="display:none"></div>
 </div>
 
+<button id="btnSnd" aria-label="Дыбыс">
+  <svg class="iOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+  <svg class="iOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9.5l4.5 5M21.5 9.5l-4.5 5"/></svg>
+</button>
+
 <div id="bar" class="hide">
   <button data-p="fifty"><span class="n">2</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h6v10H4zM14 7h6v10h-6z"/><path d="M7 10v4M17 10v4" stroke-linecap="round"/></svg>50/50</button>
   <button data-p="shield"><span class="n">1</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" stroke-linejoin="round"/><path d="M8.5 12l2.5 3 4.5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Қалқан</button>
@@ -230,8 +260,8 @@ h1 span{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-b
   <div class="qcard">
     <div class="qhead">
       <div class="badge" id="qCraft"></div>
-      <div class="who"><b>АСПАНДАҒЫ СРАҚ</b><span id="qCat"></span></div>
-      <div id="ring"><svg viewBox="0 0 46 46"><circle class="bg" cx="23" cy="23" r="20"/><circle class="fg" id="ringFg" cx="23" cy="23" r="20" stroke-dasharray="125.66" stroke-dashoffset="0"/></svg><b id="ringNum">12</b></div>
+      <div class="who"><b>АСПАНДАҒЫ СҰРАҚ</b><span id="qCat"></span></div>
+      <div id="ring"><svg viewBox="0 0 46 46"><circle class="bg" cx="23" cy="23" r="20"/><circle class="fg" id="ringFg" cx="23" cy="23" r="20" stroke-dasharray="125.66" stroke-dashoffset="0"/></svg><b id="ringNum">60</b></div>
     </div>
     <div class="qbody">
       <p id="qText"></p>
@@ -252,8 +282,8 @@ h1 span{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-b
 
 <div id="spin"><i></i><b>3D ӘЛЕМ ДАЙЫНДАЛУДА</b></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"
-  onerror="var s=document.createElement('script');s.src='https://unpkg.com/three@0.150.1/build/three.min.js';s.onerror=function(){window.__fail&&window.__fail()};document.head.appendChild(s);"></script>
+<script src="./three.min.js"
+  onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js';s.onerror=function(){var u=document.createElement('script');u.src='https://unpkg.com/three@0.150.1/build/three.min.js';u.onerror=function(){window.__fail&&window.__fail()};document.head.appendChild(u)};document.head.appendChild(s);"></script>
 <script>
 (function(){'use strict';
 /* ================= utils ================= */
@@ -300,15 +330,35 @@ function myqGet(){try{var a=JSON.parse(store('za_myq')||'[]');return Array.isArr
 function myqSet(a){store('za_myq',JSON.stringify(a))}
 
 /* ================= sound ================= */
-var AC=null,sfx={on:true};
-function ac(){if(!sfx.on)return null;try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
-  if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
+var AC=null,MG=null,SBUS=null,MBUS=null;
+var sfx={on:true,music:true};
+function ac(){if(!sfx.on)return null;try{
+  if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended'&&AC.resume)AC.resume();
+  if(!MG){MG=AC.createGain();MG.gain.value=.95;MG.connect(AC.destination);
+    SBUS=AC.createGain();SBUS.gain.value=1;SBUS.connect(MG);
+    MBUS=AC.createGain();MBUS.gain.value=.5;MBUS.connect(MG)}
+  return AC}catch(e){return null}}
+/* iOS: үнсіз <audio> loop — аудио сессиясын 'playback'-ке ауыстырады (silent switch бәрібір дыбыс шығады) */
+function silentWav(){
+  var n=1600,b=new Uint8Array(44+n);
+  function str(o,s){for(var i=0;i<s.length;i++)b[o+i]=s.charCodeAt(i)}
+  function u32(o,v){b[o]=v&255;b[o+1]=(v>>8)&255;b[o+2]=(v>>16)&255;b[o+3]=(v>>24)&255}
+  function u16(o,v){b[o]=v&255;b[o+1]=(v>>8)&255}
+  str(0,'RIFF');u32(4,36+n);str(8,'WAVE');str(12,'fmt ');u32(16,16);u16(20,1);u16(22,1);
+  u32(24,8000);u32(28,8000);u16(32,1);u16(34,1);str(36,'data');u32(40,n);
+  for(var i=0;i<n;i++)b[44+i]=128;
+  var s='';for(var j=0;j<b.length;j+=400)s+=String.fromCharCode.apply(null,b.subarray(j,j+400));
+  return 'data:audio/wav;base64,'+btoa(s)}
+var IOSA=null;
+function iosUnlock(){try{if(!IOSA){IOSA=new Audio();IOSA.loop=true;IOSA.volume=.001;IOSA.preload='auto';IOSA.src=silentWav()}
+  var p=IOSA.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
 function tone(f,d,type,vol,slide){var c=ac();if(!c)return;
   var o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=f;
   if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,slide),c.currentTime+d);
   g.gain.value=0;g.gain.linearRampToValueAtTime(vol||.16,c.currentTime+.012);
   g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);
-  o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d+.02)}
+  o.connect(g);g.connect(SBUS);o.start();o.stop(c.currentTime+d+.02)}
 function noise(d,f0,f1,vol){var c=ac();if(!c)return;
   var n=c.sampleRate*d,buf=c.createBuffer(1,n,c.sampleRate),ch=buf.getChannelData(0);
   for(var i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);
@@ -316,15 +366,58 @@ function noise(d,f0,f1,vol){var c=ac();if(!c)return;
   var flt=c.createBiquadFilter();flt.type='lowpass';flt.frequency.value=f0;
   flt.frequency.exponentialRampToValueAtTime(Math.max(60,f1),c.currentTime+d);
   var g=c.createGain();g.gain.value=vol||.3;g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);
-  s.connect(flt);flt.connect(g);g.connect(c.destination);s.start()}
-sfx.click=function(){tone(560,.06,'triangle',.1)};
-sfx.correct=function(){tone(660,.09,'triangle',.14);setTimeout(function(){tone(990,.16,'triangle',.14)},80)};
-sfx.wrong=function(){tone(220,.2,'sawtooth',.12,110)};
-sfx.boom=function(){noise(.55,1400,60,.5);tone(70,.4,'sine',.22,32)};
-sfx.whoosh=function(){noise(.3,900,180,.16)};
-sfx.power=function(){tone(440,.08,'square',.09);setTimeout(function(){tone(880,.12,'square',.09)},70)};
-sfx.win=function(){[523,659,784,1046].forEach(function(f,i){setTimeout(function(){tone(f,.2,'triangle',.13)},i*110)})};
-sfx.hurt=function(){tone(150,.24,'square',.14,70)};
+  s.connect(flt);flt.connect(g);g.connect(SBUS);s.start()}
+sfx.click=function(){tone(560,.06,'triangle',.12)};
+sfx.correct=function(){tone(660,.09,'triangle',.18);setTimeout(function(){tone(990,.16,'triangle',.18)},80)};
+sfx.wrong=function(){tone(220,.2,'sawtooth',.16,110)};
+sfx.boom=function(){noise(.55,1400,60,.55);tone(70,.4,'sine',.26,32)};
+sfx.whoosh=function(){noise(.3,900,180,.2)};
+sfx.power=function(){tone(440,.08,'square',.13);setTimeout(function(){tone(880,.12,'square',.13)},70)};
+sfx.win=function(){[523,659,784,1046].forEach(function(f,i){setTimeout(function(){tone(f,.2,'triangle',.17)},i*110)})};
+sfx.hurt=function(){tone(150,.24,'square',.18,70)};
+sfx.tick=function(){tone(1200,.04,'square',.07)};
+
+/* ---------- фондық мелодия (процедуралық секвенсор) ---------- */
+var SCALE=[440,523.25,587.33,659.25,783.99,880];
+var MEL=[0,2,4,2,5,4,2,0,1,3,4,3,5,4,2,1];
+var BASS=[110,110,98,98,87.31,87.31,82.41,82.41];
+var STEP=.24,MUS={timer:null,step:0,next:0};
+function mtone(f,at,dur,type,vol){if(!AC||!MBUS)return;
+  var o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(vol,at+.018);
+  g.gain.exponentialRampToValueAtTime(.0001,at+dur);
+  o.connect(g);g.connect(MBUS);o.start(at);o.stop(at+dur+.03)}
+function mhat(at){if(!AC||!MBUS)return;
+  var n=Math.floor(AC.sampleRate*.05),buf=AC.createBuffer(1,n,AC.sampleRate),ch=buf.getChannelData(0);
+  for(var i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);
+  var s=AC.createBufferSource();s.buffer=buf;
+  var f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=6500;
+  var g=AC.createGain();g.gain.value=.045;g.gain.exponentialRampToValueAtTime(.0001,at+.05);
+  s.connect(f);f.connect(g);g.connect(MBUS);s.start(at)}
+function musStep(){
+  if(!AC||!sfx.on||!sfx.music)return;
+  var look=AC.currentTime+.35,gap=0;
+  while(MUS.next<look&&gap++<8){
+    var st=MUS.step%16,at=Math.max(MUS.next,AC.currentTime+.02);
+    mtone(SCALE[MEL[st]]/2,at,STEP*.9,'triangle',.16);
+    if(st%2===0)mtone(SCALE[MEL[st]],at,STEP*.5,'sine',.06);
+    if(st%4===0)mtone(BASS[(st/4)%8],at,STEP*1.7,'sine',.22);
+    mhat(at);
+    MUS.next+=STEP;MUS.step++}}
+function startMusic(){if(!ac())return;iosUnlock();
+  if(MUS.timer)return;MUS.next=AC.currentTime+.1;MUS.step=0;
+  MUS.timer=setInterval(musStep,90)}
+function stopMusic(){if(MUS.timer){clearInterval(MUS.timer);MUS.timer=null}}
+function unlockAudio(){ac();iosUnlock();if(PG.on&&!PG.over&&!PG.paused)startMusic()}
+var ARMED=false;
+function armAudio(){if(ARMED)return;ARMED=true;
+  ['pointerdown','touchstart','click','keydown'].forEach(function(e){addEventListener(e,unlockAudio,{passive:true})})}
+function sndIcon(){var b=$('btnSnd');if(b)b.classList.toggle('muted',!sfx.on)}
+function setSound(on){sfx.on=!!on;store('za_snd3d',sfx.on?'1':'0');
+  if(!sfx.on){stopMusic();if(AC&&AC.suspend)AC.suspend();if(IOSA&&IOSA.pause)IOSA.pause()}
+  else{ac();unlockAudio();if(PG.on&&!PG.over)startMusic()}
+  sndIcon()}
+function toggleSound(){setSound(!sfx.on)}
 
 /* ================= boot guard ================= */
 window.__fail=function(){$('nogl').classList.add('show');$('spin').classList.add('gone')};
@@ -818,9 +911,10 @@ function fleePlane(o){
   setTimeout(function(){removePlane(o)},1500)}
 
 /* ================= game state ================= */
-var PG={on:false,wave:1,lives:3,livesMax:3,score:0,streak:0,maxStreak:0,kills:0,correct:0,total:0,
-  cur:null,serial:0,src:'pool',dur:12000,t0:0,locked:false,shield:false,fifty:2,shields:1,
+var PG={on:false,wave:1,lives:5,livesMax:5,score:0,streak:0,maxStreak:0,kills:0,correct:0,total:0,
+  cur:null,serial:0,src:'pool',dur:60000,t0:0,tSec:60,bonusNext:0,rewinds:0,locked:false,shield:false,fifty:2,shields:1,
   nextAt:0,best:0,over:false,decor:false,paused:false,pauseAt:0};
+function tSecGet(){var v=+(store('za_t3d')||60);if(!isFinite(v)||v<=0)v=60;return clamp(Math.round(v),10,180)}
 function qList(){
   var own=myqGet();
   if(PG.src==='own')return own.length?own.map(function(q){return Object.assign({own:1},q)}):QUIZ_POOL.slice();
@@ -839,8 +933,15 @@ function spawn(){
   PG.nextAt=performance.now()+Math.max(1500,4200-PG.wave*320)+rnd(0,900)}
 
 /* ================= HUD ================= */
+var HEART='M32 54S8 38 8 22C8 12 16 7 23 7c5 0 8 3 9 5 1-2 4-5 9-5 7 0 15 5 15 15 0 16-24 32-24 32z';
+var HEART_HALF='M32 54S8 38 8 22C8 12 16 7 23 7c5 0 8 3 9 5z';
 function hearts(){
-  var h='';for(var i=0;i<PG.livesMax;i++)h+='<svg class="h'+(i<PG.lives?'':' off')+'" viewBox="0 0 64 64"><path d="M32 54S8 38 8 22C8 12 16 7 23 7c5 0 8 3 9 5 1-2 4-5 9-5 7 0 15 5 15 15 0 16-24 32-24 32z" fill="#ef4444"/></svg>';
+  var h='';
+  for(var i=0;i<PG.livesMax;i++){
+    var lv=clamp(PG.lives-i,0,1);
+    if(lv>=1)h+='<svg class="h" viewBox="0 0 64 64"><path d="'+HEART+'" fill="#ef4444"/></svg>';
+    else if(lv>=.5)h+='<svg class="h half" viewBox="0 0 64 64"><path d="'+HEART+'" fill="#ef4444" opacity=".22"/><path d="'+HEART_HALF+'" fill="#ef4444"/></svg>';
+    else h+='<svg class="h off" viewBox="0 0 64 64"><path d="'+HEART+'" fill="#ef4444"/></svg>'}
   $('hLives').innerHTML=h}
 function hud(){
   $('hScore').querySelector('.big').textContent=PG.score;
@@ -877,8 +978,8 @@ function openPlaneQ(o){
   $('opts').innerHTML=h;
   Array.prototype.forEach.call($('opts').children,function(b){b.addEventListener('click',onAnswer)});
   $('sheet').classList.add('show');
-  PG.t0=performance.now();PG.dur=(PG.wave>6?10000:12000)+(PG.shield?4000:0);
-  $('ring').classList.remove('low');
+  PG.t0=performance.now();PG.tSec=tSecGet();PG.dur=PG.tSec*1000+PG.bonusNext;PG.bonusNext=0;
+  $('ring').classList.remove('low');$('ringNum').textContent=Math.ceil(PG.dur/1000);
   sfx.click()}
 function craftSVG(cr){
   var c='#'+[cr.C.b1,cr.C.b2,cr.C.b3,cr.C.a1].map(function(n){return ('000000'+n.toString(16)).slice(-6)}).join('|').split('|');
@@ -890,7 +991,9 @@ function tickSheet(now){
   var left=Math.max(0,PG.dur-(now-PG.t0)),sec=Math.ceil(left/1000);
   $('ringFg').setAttribute('stroke-dashoffset',String(125.66*(1-left/PG.dur)));
   $('ringNum').textContent=sec;
-  if(sec<=3)$('ring').classList.add('low');
+  if(sec<=3){$('ring').classList.add('low');
+    if(sec!==PG.lastTick&&sec>0){PG.lastTick=sec;sfx.tick()}}
+  else{$('ring').classList.remove('low');PG.lastTick=0}
   if(left<=0)timeUp()}
 function planeReveal(a){
   var bs=$('opts').children;
@@ -905,35 +1008,56 @@ function onAnswer(ev){
   if(ok){
     var bonus=Math.round((PG.dur-(performance.now()-PG.t0))/PG.dur*4);
     PG.streak++;PG.maxStreak=Math.max(PG.maxStreak,PG.streak);PG.correct++;
+    var gained=PG.lives<PG.livesMax;
+    PG.lives=Math.min(PG.livesMax,PG.lives+.5);
     var pts=(o.cr.boss?30:o.cr.pts)+Math.min(PG.streak-1,4)*2+clamp(bonus,0,4);
     PG.score+=pts;PG.kills++;
     verdict(true,'Дұрыс! +'+pts);sfx.correct();
     $('flash').classList.remove('go');void $('flash').offsetWidth;$('flash').classList.add('go');
     setTimeout(function(){boomPlane(o)},430);
-    PG.cur=null;$('sheet').classList.remove('show');
+    PG.cur=null;PG.locked=false;$('sheet').classList.remove('show');
     bumpScore();progress();
-    toast(o.cr.boss?'Босс жойылды! +'+pts:'Дұрыс! +'+pts+(PG.streak>1?' · комбо ×'+PG.streak:''));
+    toast(o.cr.boss?'Босс жойылды! +'+pts:'Дұрыс! +'+pts+(gained?' · +½ жан':'')+(PG.streak>1?' · комбо ×'+PG.streak:''));
     hud();
   }else{
     btn.classList.add('wrong');verdict(false,'Қате');sfx.wrong();
     PG.streak=0;loseLife();
-    setTimeout(function(){fleePlane(o);PG.cur=null;$('sheet').classList.remove('show')},700);
+    setTimeout(function(){fleePlane(o);PG.cur=null;PG.locked=false;$('sheet').classList.remove('show')},700);
     hud()}}
 function timeUp(){
   if(!PG.cur||PG.locked)return;PG.locked=true;PG.total++;
   planeReveal(PG.cur.q.a);verdict(false,'Уақыт');sfx.wrong();PG.streak=0;loseLife();
-  setTimeout(function(){if(PG.cur)fleePlane(PG.cur);PG.cur=null;$('sheet').classList.remove('show')},700);hud()}
+  setTimeout(function(){if(PG.cur)fleePlane(PG.cur);PG.cur=null;PG.locked=false;$('sheet').classList.remove('show')},700);hud()}
 function escapePlane(o){fleePlane(o);PG.streak=0;loseLife();toast('Ұшақ жерге жетті — бір өмір кетті!')}
 function loseLife(){
   if(PG.shield){PG.shield=false;PG.shields=0;verdict(true,'Қалқан құтқарды!');hud();return}
-  PG.lives--;hud();
+  PG.lives=Math.max(0,PG.lives-1);hud();
   $('hLives').classList.add('break');setTimeout(function(){$('hLives').classList.remove('break')},700);
   $('hit').classList.remove('go');void $('hit').offsetWidth;$('hit').classList.add('go');
   W.shake=Math.min(1.4,W.shake+.6);sfx.hurt();
-  if(PG.lives<=0)gameOver()}
+  if(PG.lives<=0)rewind()}
+function rewind(){
+  PG.rewinds++;
+  var back=Math.min(2,PG.wave-1);
+  PG.wave=Math.max(1,PG.wave-2);
+  PG.lives=PG.livesMax;PG.streak=0;
+  var pen=Math.round(PG.score*.2);PG.score=Math.max(0,PG.score-pen);
+  PG.shield=false;PG.cur=null;PG.locked=false;PG.tSec=tSecGet();
+  $('sheet').classList.remove('show');
+  for(var i=W.planes.length-1;i>=0;i--)if(!W.planes[i].fleeing)removePlane(W.planes[i]);
+  PG.nextAt=performance.now()+2000;
+  if(PG.score>PG.best){PG.best=PG.score;store('za_best3d',String(PG.best))}
+  hud();bumpScore();
+  banner('ДҢГУЛ','ЖҮРЕК БІТТІ — КЕРІ',(back?back+' ТОЛҚЫН КЕРІ · ':'')+'Жүректер толды · ұпай −'+pen);
+  sfx.hurt()}
 function progress(){
   if(PG.kills%5!==0)return;
-  PG.wave++;banner('САҚ БОЛ','ТОЛҚЫН '+PG.wave,PG.wave%5===0?'АЛТЫН БОСС КЕЛДІ!':'Ұшақтар тезірек шабуылдайды');
+  PG.wave++;
+  PG.shields=Math.min(3,PG.shields+1);
+  if(PG.wave%2===0)PG.fifty=Math.min(3,PG.fifty+1);
+  var gain=PG.lives<PG.livesMax;PG.lives=Math.min(PG.livesMax,PG.lives+1);
+  banner('САҚ БОЛ','ТОЛҚЫН '+PG.wave,(PG.wave%5===0?'АЛТЫН БОСС КЕЛДІ!':'Ұшақтар тезірек шабуылдайды')+
+    (gain?' · +1 жүрек · +1 қалқан':' · +1 қалқан'));
   sfx.power();hud()}
 function bumpScore(){var e=$('hScore');e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump')}
 
@@ -956,7 +1080,7 @@ function onTap(ev){
     var sx=(_pv.x*.5+.5)*innerWidth,sy=(-_pv.y*.5+.5)*innerHeight;
     var dist=Math.max(60,o.grp.position.distanceTo(W.cam.position));
     var pxPerUnit=innerHeight/(2*dist*Math.tan(fov/2));
-    var rad=clamp(o.cr.sc*34*pxPerUnit,56,150);
+    var rad=Math.max(84,clamp(o.cr.sc*34*pxPerUnit,84,190))+16;
     var d=Math.sqrt((sx-ev.clientX)*(sx-ev.clientX)+(sy-ev.clientY)*(sy-ev.clientY));
     if(d<=rad&&d<bd){bd=d;best=o}}
   if(best)openPlaneQ(best)}
@@ -990,6 +1114,7 @@ function show(id){$('scr').classList.add('show');$('panel').innerHTML=id}
 function hide(){$('scr').classList.remove('show')}
 function nameOf(){return store('za_player')||''}
 function screenStart(){
+  stopMusic();
   PG.on=false;PG.decor=true;PG.paused=false;PG.cur=null;PG.locked=false;
   PG.nextAt=performance.now()+300;
   $('hud').classList.add('hide');$('bar').classList.add('hide');
@@ -998,6 +1123,11 @@ function screenStart(){
     '<h1>Зат алмасу <span>3D</span><br>Ұшақ шабуылы</h1>'+
     '<p class="sub">Аспанға қара: ұшақтар сұрақ алып келеді. Дұрыс жауап бер — ұшақ жарылады.</p>'+
     '<div class="field"><input id="inName" placeholder="Атыңды жаз" value="'+esc(nameOf())+'" maxlength="18"></div>'+
+    '<div class="field"><button class="stp" id="tMinus" aria-label="Азайту">&#8722;</button>'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#4f6ef7" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9.5V13l2.6 1.8M9.5 2h5"/></svg>'+
+      '<input id="inTime" type="number" min="10" max="180" step="5" inputmode="numeric" value="'+PG.tSec+'">'+
+      '<b class="unit">сек</b>'+
+      '<button class="stp" id="tPlus" aria-label="Көбейту">+</button></div>'+
     '<div class="seg" id="segSrc">'+
       '<button data-s="pool"'+(PG.src==='pool'?' class="on"':'')+'>Ойын сұрағы</button>'+
       '<button data-s="own"'+(PG.src==='own'?' class="on"':'')+'>Менікі ('+own+')</button>'+
@@ -1007,14 +1137,25 @@ function screenStart(){
       '<div class="card"><div class="lbl">Ұшақ</div><div class="big">5</div></div></div>'+
     '<button class="cta" id="btnPlay">ОЙЫНДЫ БАСТАУ</button>'+
     '<button class="ghost" id="btnEdit">ӨЗ СҰРАҒЫМДЫ ЖАЗУ</button>'+
-    '<div class="note">Телефонда саусақпен түртіп атыс. Басқару: экранды сәл жылжытсаң камера да қозғалады.</div>');
+    '<div class="note">Сұрақ уақыты: <b id="tHint">'+PG.tSec+'</b> секунд · 5 жүрек · дұрыс жауап +½ жүрек · жүрек бітсе 2 толқын кері шегеріледі. Телефонда саусақпен түртіп атыс.</div>');
   $('inName').addEventListener('input',function(){store('za_player',this.value)});
+  function setTime(v,strict){var n=Math.round(+v);
+    if(!strict){if(!isFinite(n)||n<10||n>180)return}
+    else{if(!isFinite(n))n=60;n=clamp(n,10,180)}
+    PG.tSec=n;store('za_t3d',String(n));
+    var i=$('inTime'),h=$('tHint');if(i)i.value=n;if(h)h.textContent=n}
+  $('inTime').addEventListener('input',function(){setTime(this.value,false)});
+  $('inTime').addEventListener('blur',function(){setTime(this.value,true)});
+  $('inTime').addEventListener('keydown',function(e){if(e.key==='Enter'){this.blur()}});
+  $('tMinus').addEventListener('click',function(){sfx.click();setTime(PG.tSec-5,true)});
+  $('tPlus').addEventListener('click',function(){sfx.click();setTime(PG.tSec+5,true)});
   $('segSrc').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
     PG.src=b.dataset.s;sfx.click();screenStart()});
   $('btnPlay').addEventListener('click',startGame);
   $('btnEdit').addEventListener('click',screenEdit)}
 function screenEdit(){
   if(PG.on&&!PG.paused){PG.paused=true;PG.pauseAt=performance.now();$('sheet').classList.remove('show')}
+  if(PG.paused)stopMusic();
   renderEdit()}
 function tickRow(k,letter){
   return '<div class="orow"><button class="tick'+(k===0?' on':'')+'" data-k="'+k+'" aria-label="'+letter+' — дұрыс">'+
@@ -1056,12 +1197,15 @@ function editBack(){
   PG.paused=false;
   if(PG.on&&!PG.over){
     hide();
+    startMusic();
     if(PG.cur&&PG.locked===false){PG.t0+=was;$('sheet').classList.add('show')}
   } else screenStart()}
 function startGame(){
   if(!nameOf()){store('za_player','Ойыншы');}
-  PG.on=true;PG.over=false;PG.decor=false;PG.wave=1;PG.lives=3;PG.livesMax=3;PG.score=0;PG.streak=0;
+  armAudio();startMusic();
+  PG.on=true;PG.over=false;PG.decor=false;PG.wave=1;PG.lives=5;PG.livesMax=5;PG.score=0;PG.streak=0;
   PG.maxStreak=0;PG.kills=0;PG.correct=0;PG.total=0;PG.serial=0;PG.cur=null;PG.locked=false;
+  PG.tSec=tSecGet();PG.bonusNext=0;PG.rewinds=0;PG.lastTick=0;
   PG.fifty=2;PG.shields=1;PG.shield=false;PG.nextAt=performance.now()+700;
   QUEUE=[];
   for(var i=W.planes.length-1;i>=0;i--)removePlane(W.planes[i]);
@@ -1089,21 +1233,26 @@ function gameOver(){
 function usePower(p){
   if(p==='edit'){screenEdit();return}
   if(p==='quit'){
+    stopMusic();
     PG.paused=false;PG.on=false;PG.over=false;PG.cur=null;PG.locked=false;PG.shield=false;
     $('sheet').classList.remove('show');
+    if(PG.score>PG.best){PG.best=PG.score;store('za_best3d',String(PG.best))}
     for(var i=W.planes.length-1;i>=0;i--)removePlane(W.planes[i]);
     screenStart();return}
   if(PG.paused)return;
-  if(!PG.cur){toast('Алдымен ұшақты түртіп сұрағын аш');return}
   if(p==='fifty'){
+    if(!PG.cur||PG.locked){toast('Алдымен ұшақты түртіп сұрағын аш');return}
     if(PG.fifty<=0)return;
     var a=PG.cur.q.a,wr=shuffle([0,1,2,3].filter(function(i){return i!==a})).slice(0,2);
     Array.prototype.forEach.call($('opts').children,function(b){
       if(wr.indexOf(+b.dataset.i)>-1){b.classList.add('dim');b.style.pointerEvents='none'}});
     PG.fifty--;sfx.power();hud();toast('50/50 қолданылды')}
   if(p==='shield'){
-    if(PG.shields<=0)return;
-    PG.shield=true;PG.shields=0;sfx.power();hud();toast('Қалқан: келесі қате — өмір кетпейді')}}
+    if(PG.shields<=0){toast('Қалқан жоқ — толқын сайын бір дана жинайсың');return}
+    PG.shields=0;PG.shield=true;sfx.power();
+    if(PG.cur&&!PG.locked){PG.dur+=30000;toast('Қалқан: +30 секунд · бір қатеден сақтайды')}
+    else{PG.bonusNext+=30000;toast('Қалқан сақталды: келесі сұраққа +30 секунд')}
+    hud()}}
 
 /* ================= loop ================= */
 function animate(){
@@ -1112,6 +1261,7 @@ function animate(){
   if(PG.paused){W.r.render(W.scene,W.cam);return}
   W.t+=dt;
   if(PG.on&&!PG.over){
+    if(!PG.cur)PG.locked=false;
     if(now>PG.nextAt&&W.planes.length<(PG.wave<3?2:(PG.wave<7?3:4)))spawn();
     tickSheet(now)}
   else if(PG.decor&&W.planes.length<2&&now>PG.nextAt){
@@ -1131,9 +1281,12 @@ function boot(){
   if(!hasGL()||!window.THREE){window.__fail();return}
   initWorld();initLabels();initPick();initBar();
   PG.best=+(store('za_best3d')||0);
+  PG.tSec=tSecGet();
+  sfx.on=store('za_snd3d')!=='0';sndIcon();
+  $('btnSnd').addEventListener('click',function(e){e.stopPropagation();toggleSound();sfx.click()});
   $('spin').classList.add('gone');
   screenStart();animate();
-  addEventListener('pointerdown',function(){ac()},{once:true})}
+  armAudio()}
 function waitThree(n){
   if(window.THREE)return boot();
   if(n<=0)return window.__fail();
